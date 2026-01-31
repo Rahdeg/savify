@@ -49,14 +49,19 @@ All members will treat one another with respect and professionalism. We value di
   **Example:**
   ```bash
   git commit -m "FE: Implement payment screen"
-## Branch names should follow the format:
-     **Example:**
+  ```
+
+- Branch names should follow the format: `initials_feature_name`
+
+  **Example:**
   ```bash
-  initials_feature_name
+  jd_payment_screen
+  ```
 
 - Function names must be meaningful and self-descriptive, clearly reflecting their purpose and behaviour.
 - Always pull the latest changes from the main branch before creating or working on a new feature branch to avoid merge conflicts.
-```
+
+---
 
 ## Conflict Resolution & Non-Participation
 - Issues should be addressed early and respectfully within the team.
@@ -68,9 +73,12 @@ All members will treat one another with respect and professionalism. We value di
 
 
 ## Agreement
-- By signing below, team members agree to follow this Code of Conduct and contribute positively to the success of the project.
-- | Name | Signature | Date |
-| ---- | --------- | ---- |
-|      |           |      |
-|      |           |      |
-|      |           |      |
+By signing below, team members agree to follow this Code of Conduct and contribute positively to the success of the project.
+
+| Name | Signature | Date |
+| --- | --- | --- |
+| Adegbite Raheem | R.A | 31-01-26 |
+| | | |
+| | | |
+| | | |
+| | | |
