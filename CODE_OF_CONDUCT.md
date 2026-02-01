@@ -78,7 +78,7 @@ By signing below, team members agree to follow this Code of Conduct and contribu
 | Name | Signature | Date |
 | --- | --- | --- |
 | Adegbite Raheem | R.A | 31-01-26 |
-| |  |
+| Amidat Abiola Ishola | A.I | 01-02-26 |
 | | | |
 | | | |
 | | | |
