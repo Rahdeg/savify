@@ -79,6 +79,6 @@ By signing below, team members agree to follow this Code of Conduct and contribu
 | --- | --- | --- |
 | Adegbite Raheem | R.A | 31-01-26 |
 | Amidat Abiola Ishola | A.I | 01-02-26 |
-| | | |
+| Maram Lakshmi Sairam| M.lasairam |02-02-26 |
 | | | |
 | | | |
