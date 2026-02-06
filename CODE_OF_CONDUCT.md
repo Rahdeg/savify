@@ -80,6 +80,7 @@ By signing below, team members agree to follow this Code of Conduct and contribu
 | Adegbite Raheem | R.A | 31-01-26 |
 | Amidat Abiola Ishola | A.I | 01-02-26 |
 | Omobolanle Famotibe | O.F | 02-02-26 |
+| Chinedum Onovo | C.O | 04-02-26 |
 | | | |
 | | | |
 | | | |
