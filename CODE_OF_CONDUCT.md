@@ -66,9 +66,10 @@ All members will treat one another with respect and professionalism. We value di
 ## Conflict Resolution & Non-Participation
 - Issues should be addressed early and respectfully within the team.
 - If a member becomes inactive:
-    - A check-in message will be sent
-    - Tasks may be reassigned if necessary
-    - The issue may be escalated to the module tutor if it remains unresolved
+    - A private check-in will be made to understand the reason for non-participation.
+    - Tasks will be reassigned if necessary to avoid delays.
+    - A formal warning will be issued if inactivity continues.
+    - If non-participation occurs three consecutive times, the member will be removed from the group and the issue will be reported to the module lecturer
 
 
 
