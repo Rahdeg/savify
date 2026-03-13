@@ -1,0 +1,39 @@
+extends layout
+
+block content
+  h1 #{Dashboard.Welcome.text}
+
+  h3 Total Savings: £#{Total_Savings}
+  h3 Total Project: #{Total_Project}
+  h3 This month saved: £#{This_month_saved}
+
+  if goals && goals.length
+    each goal in goals
+      h2 #{goal.Name}
+      p Overview
+
+      div.btn
+        a(href="/goals") View goals
+  else
+    p No goals found.
+
+  h3 Recent Activity
+
+  if Activities && Activities.length
+    table
+      thead
+        tr
+          th Activity
+          th Message
+
+      tbody
+        each activity in Activities
+          tr
+            td #{activity.activity_type}
+            td #{activity.Message}
+
+          tr
+            td #{activity.id}
+            td #{activity.time}
+  else
+    p No recent activity found.
