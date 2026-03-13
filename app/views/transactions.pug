@@ -1,0 +1,18 @@
+extend layout
+
+block content
+  
+  p Welcome Harry
+  h1 Transactions
+  table
+    thread 
+      each t in transactions
+        tr
+          td #{t.type}
+          td £#{t.amount}
+
+        tr
+          td #{t.id}
+          td #{t.time}
+  else 
+    p No transactions found.
