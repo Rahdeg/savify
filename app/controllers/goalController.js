@@ -2,13 +2,11 @@ const goalModel = require("../models/goalModel");
 
 exports.listGoals = async (req, res) => {
   try {
-    const userId = 1;
+    const userId = 3;
     const results = await goalModel.getAllGoalsByUser(userId);
-
-    console.log("Fetched goals:", results);
     res.render("goals", {
       title: "My Savings Goals",
-      goals: results,
+      fetchedGoals: results,
     });
   } catch (err) {
     return res.status(500).send(err.message);

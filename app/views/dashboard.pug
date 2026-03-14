@@ -1,15 +1,15 @@
 extends layout
 
 block content
-  h1 #{Dashboard.Welcome.text}
+  h1  Welcome #{profile.full_name}!
 
-  h3 Total Savings: £#{Total_Savings}
-  h3 Total Project: #{Total_Project}
-  h3 This month saved: £#{This_month_saved}
-
+  - const totalSavings = goals.reduce((sum, g) => sum + (parseFloat(g.current_amount) || 0), 0)
+  h3 Total Savings: £#{totalSavings.toFixed(2)}
+  h3 Total Goals: #{goals.length}
+  - console.log(goals)
   if goals && goals.length
     each goal in goals
-      h2 #{goal.Name}
+      h2 #{goal.goal_title}
       p Overview
 
       div.btn
@@ -18,8 +18,8 @@ block content
     p No goals found.
 
   h3 Recent Activity
-
-  if Activities && Activities.length
+  - console.log(activities)
+  if activities 
     table
       thead
         tr
@@ -27,13 +27,13 @@ block content
           th Message
 
       tbody
-        each activity in Activities
+        each activity in activities
           tr
             td #{activity.activity_type}
-            td #{activity.Message}
+            td #{activity.activity_message}
 
           tr
-            td #{activity.id}
-            td #{activity.time}
+            td #{activity.activity_id}
+            td #{activity.created_at}
   else
-    p No recent activity found.
+    p No recent activity founds.

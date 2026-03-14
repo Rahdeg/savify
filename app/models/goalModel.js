@@ -10,8 +10,8 @@ exports.getAllGoalsByUser = async (userId) => {
       g.current_amount,
       g.goal_status,
       g.end_date
-    FROM savings_goals g
-    JOIN goal_categories gc ON g.category_id = gc.category_id
+    FROM savings_goal g
+    JOIN goal_category gc ON g.category_id = gc.category_id
     WHERE g.user_id = ?
     ORDER BY g.created_at DESC
   `;
@@ -33,8 +33,8 @@ exports.getGoalById = async (goalId) => {
       g.end_date,
       g.scheduled_withdrawal_date,
       g.goal_status
-    FROM savings_goals g
-    JOIN goal_categories gc ON g.category_id = gc.category_id
+    FROM savings_goal g
+    JOIN goal_category gc ON g.category_id = gc.category_id
     WHERE g.goal_id = ?
   `;
   return db.query(sql, [goalId]);
