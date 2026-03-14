@@ -4,20 +4,15 @@ block content
   h1.title Goals
   p Here you can set your savings goals and track your progress towards achieving them.
 
-  if Goals
-    p Total Amount: £#{Goals.Total_Amount}
-    p Status: #{Goals.Status}
-
-    div
-      p Id: #{Goals.id}
-      p Name: #{Goals.Name}
-      p Target Amount: £#{Goals.Target_Amount}
-      p Current Amount: £#{Goals.Current_Amount}
-      p Withdrawal date: #{Goals.Deadline}
-      p Status: #{Goals.Status}
-      p Payment method: #{Goals.created_at}
-
-    p goals description
+  if fetchedGoals && fetchedGoals.length
+    each goal in fetchedGoals
+      div
+        h2 #{goal.goal_title}
+        p Target Amount: £#{goal.target_amount}
+        p Current Amount: £#{goal.current_amount}
+        p Withdrawal date: #{goal.end_date}
+        p Status: #{goal.goal_status}
+      p goals description
 
   else
     p No goals found.
