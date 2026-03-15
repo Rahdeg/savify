@@ -3,19 +3,21 @@ html(lang="en")
     head
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        title  #{title}
-    body 
-     h1 Welcome to Savify
-        nav
-        ul
-            li
-            a(href="/dashboard") Dashboard
-            li
-            a(href="/goals") Goals
-            li
-            a(href="/transactions") Transactions
+        title #{title}
+        script(src="https://cdn.tailwindcss.com")
+        link(rel="stylesheet", href="/css/style.css")
+    body(class="bg-slate-50 text-slate-800")
+        .max-w-5xl.mx-auto.px-4.py-6
+            header(class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6")
+                h1(class="text-2xl font-semibold") Welcome to Savify
+                nav
+                    ul(class="flex items-center gap-2 sm:gap-3")
+                        li
+                            a.nav-link(href="/dashboard") Dashboard
+                        li
+                            a.nav-link(href="/goals") Goals
+                        li
+                            a.nav-link(href="/transactions") Transactions
 
-
-
-
-        block content
+            main
+                block content

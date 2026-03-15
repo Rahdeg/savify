@@ -1,18 +1,21 @@
 extends layout
 
 block content
-  h1.title Goals
-  p Here you can set your savings goals and track your progress towards achieving them.
+  section(class='space-y-4')
+    h1(class='text-xl font-semibold') Goals
+    p(class='text-slate-600') Here you can set your savings goals and track your progress towards achieving them.
 
-  if fetchedGoals && fetchedGoals.length
-    each goal in fetchedGoals
-      div
-        h2 #{goal.goal_title}
-        p Target Amount: £#{goal.target_amount}
-        p Current Amount: £#{goal.current_amount}
-        p Withdrawal date: #{goal.end_date}
-        p Status: #{goal.goal_status}
-        a(href='/goals/' + goal.goal_id) See goal details
+    if fetchedGoals && fetchedGoals.length
+      .grid(class='grid-cols-1 md:grid-cols-2 gap-4')
+        each goal in fetchedGoals
+          article.card
+            h2(class='text-lg font-semibold mb-2') #{goal.goal_title}
+            p #[span.label Target Amount:] £#{goal.target_amount}
+            p #[span.label Current Amount:] £#{goal.current_amount}
+            p #[span.label Withdrawal date:] #{goal.end_date}
+            p #[span.label Status:] #{goal.goal_status}
+            .mt-3
+              a.link-text(href='/goals/' + goal.goal_id) See goal details
 
-  else
-    p No goals found.
+    else
+      p No goals found.
