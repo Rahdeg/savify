@@ -34,6 +34,6 @@ block content
 
           tr
             td #{activity.activity_id}
-            td #{activity.created_at}
+            td #{formatDateTime(activity.created_at)}
   else
     p No recent activity founds.

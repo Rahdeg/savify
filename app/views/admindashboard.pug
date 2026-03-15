@@ -1,27 +1,43 @@
-extends layout 
+extends layout
 
 block content
-  h1 Welcome Super Admin
+  section(class="space-y-6")
+    h1(class="text-xl font-semibold") Admin Dashboard
 
-  h3 Total Savings: £#{stats.total_savings}
-  h3 Total Users: #{stats.total_users}
-  h3 Total Goals: #{stats.total_goals}
-  h3 Total Withdrawals: #{stats.total_withdrawals}
+    //- Summary stat cards
+    .grid(class="grid-cols-2 sm:grid-cols-4 gap-4")
+      .card.text-center
+        p(class="text-slate-500 text-sm mb-1") Total Savings
+        p(class="text-2xl font-bold") £#{stats.total_savings}
+      .card.text-center
+        p(class="text-slate-500 text-sm mb-1") Total Users
+        p(class="text-2xl font-bold") #{stats.total_users}
+      .card.text-center
+        p(class="text-slate-500 text-sm mb-1") Total Goals
+        p(class="text-2xl font-bold") #{stats.total_goals}
+      .card.text-center
+        p(class="text-slate-500 text-sm mb-1") Total Withdrawals
+        p(class="text-2xl font-bold") #{stats.total_withdrawals}
 
-  h3 Users 
-  table 
-      thead
-        tr
-          th Name
-          th Active Goals
-          th Inactive Goals
-          th Total Goals
-      tbody
-        each user in users
-          tr
-            td #{user.full_name}
-            td #{user.active_goals}
-            td #{user.inactive_goals}
-            td #{user.total_goals}
-  else
-    p User is registered yet. 
+    //- Users table
+    h2(class="text-lg font-semibold") Users
+    if users && users.length
+      .table-wrap
+        table.app-table
+          thead
+            tr
+              th Name
+              th Email
+              th Active Goals
+              th Inactive Goals
+              th Total Goals
+          tbody
+            each user in users
+              tr
+                td #{user.full_name}
+                td #{user.email}
+                td #{user.active_goals}
+                td #{user.inactive_goals}
+                td #{user.total_goals}
+    else
+      p No users registered yet.

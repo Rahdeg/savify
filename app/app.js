@@ -3,12 +3,17 @@ const express = require("express");
 const userRoutes = require("./routes/userRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const { formatDate, formatDateTime } = require("./utils/formatDate");
 
 // Create express app
 var app = express();
 // Use the Pug templating engine
 app.set("view engine", "pug");
 app.set("views", "./app/views");
+
+// Make date helpers available in every Pug template
+app.locals.formatDate = formatDate;
+app.locals.formatDateTime = formatDateTime;
 
 // Use the routes defined in the userRoutes, goalRoutes, and adminRoutes files
 app.use("/", userRoutes);

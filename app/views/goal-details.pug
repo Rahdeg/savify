@@ -11,7 +11,7 @@ block content
         p #[span.label Target Amount:] £#{goal.target_amount}
         p #[span.label Current Amount:] £#{goal.current_amount}
         p #[span.label Status:] #{goal.goal_status}
-        p #[span.label End Date:] #{goal.end_date}
+        p #[span.label End Date:] #{formatDate(goal.end_date)}
 
         if goal.goal_description
           p.mt-2
@@ -34,7 +34,7 @@ block content
                   td #{txn.transaction_type}
                   td £#{txn.amount}
                   td #{txn.transaction_status}
-                  td #{txn.transaction_date}
+                  td #{formatDateTime(txn.transaction_date)}
       else
         p No transactions found for this goal.
     else

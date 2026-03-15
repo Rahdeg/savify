@@ -29,7 +29,7 @@ class AdminDashboard {
           (SELECT COUNT(*) FROM users WHERE role = 'user') AS total_users,
           (SELECT COUNT(*) FROM savings_goal) AS total_goals,
           (SELECT COALESCE(SUM(current_amount), 0) FROM savings_goal) AS total_savings,
-          (SELECT COUNT(*) FROM withdrawals) AS total_withdrawals
+          (SELECT COUNT(*) FROM withdrawal) AS total_withdrawals
       `;
 
       const results = await db.query(sql, []);
