@@ -6,7 +6,6 @@ exports.showAdminDashboard = async (req, res) => {
     const adminDashboard = new AdminDashboard();
 
     // Step 6: Populate object properties using model methods.
-    // Controller does not need to know SQL details.
     await adminDashboard.getStats();
     await adminDashboard.getUsersWithGoalStats();
 
