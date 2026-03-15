@@ -12,7 +12,7 @@ block content
             h2(class='text-lg font-semibold mb-2') #{goal.goal_title}
             p #[span.label Target Amount:] £#{goal.target_amount}
             p #[span.label Current Amount:] £#{goal.current_amount}
-            p #[span.label Withdrawal date:] #{goal.end_date}
+            p #[span.label Withdrawal date:] #{formatDate(goal.end_date)}
             p #[span.label Status:] #{goal.goal_status}
             .mt-3
               a.link-text(href='/goals/' + goal.goal_id) See goal details
