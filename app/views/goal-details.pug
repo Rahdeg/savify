@@ -1,36 +1,41 @@
 extends layout
 
 block content
-  h1 Goal Details
+  section(class='space-y-4')
+    h1(class='text-xl font-semibold') Goal Details
 
-  if goal
-    h2 #{goal.goal_title}
-    p Category: #{goal.category_name}
-    p Target Amount: £#{goal.target_amount}
-    p Current Amount: £#{goal.current_amount}
-    p Status: #{goal.goal_status}
-    p End Date: #{goal.end_date}
+    if goal
+      .card
+        h2(class='text-lg font-semibold mb-2') #{goal.goal_title}
+        p #[span.label Category:] #{goal.category_name}
+        p #[span.label Target Amount:] £#{goal.target_amount}
+        p #[span.label Current Amount:] £#{goal.current_amount}
+        p #[span.label Status:] #{goal.goal_status}
+        p #[span.label End Date:] #{goal.end_date}
 
-    if goal.goal_description
-      p Description: #{goal.goal_description}
+        if goal.goal_description
+          p.mt-2
+            span.label Description:
+            |  #{goal.goal_description}
 
-    h3 Transactions
-    if transactions && transactions.length
-      table
-        thead
-          tr
-            th Type
-            th Amount
-            th Status
-            th Date
-        tbody
-          each txn in transactions
-            tr
-              td #{txn.transaction_type}
-              td £#{txn.amount}
-              td #{txn.transaction_status}
-              td #{txn.transaction_date}
+      h3(class='text-lg font-semibold') Transactions
+      if transactions && transactions.length
+        .table-wrap
+          table.app-table
+            thead
+              tr
+                th Type
+                th Amount
+                th Status
+                th Date
+            tbody
+              each txn in transactions
+                tr
+                  td #{txn.transaction_type}
+                  td £#{txn.amount}
+                  td #{txn.transaction_status}
+                  td #{txn.transaction_date}
+      else
+        p No transactions found for this goal.
     else
-      p No transactions found for this goal.
-  else
-    p Goal not found.
+      p Goal not found.
