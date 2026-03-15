@@ -1,18 +1,34 @@
-extend layout
+extends layout
 
 block content
-  
-  p Welcome Harry
   h1 Transactions
-  table
-    thread 
-      each t in transactions
-        tr
-          td #{t.type}
-          td £#{t.amount}
 
+  if profile && profile.full_name
+    p Here are all transactions for #{profile.full_name}.
+
+  if transactions && transactions.length
+    table
+      thead
         tr
-          td #{t.id}
-          td #{t.time}
-  else 
+          th Goal
+          th Type
+          th Amount
+          th Status
+          th Reference
+          th Payment Method
+          th Date
+          th Details
+      tbody
+        each t in transactions
+          tr
+            td #{t.goal_title}
+            td #{t.transaction_type}
+            td £#{t.amount}
+            td #{t.transaction_status}
+            td #{t.transaction_reference || 'N/A'}
+            td #{t.method_name ? t.method_name + (t.provider_name ? ' - ' + t.provider_name : '') : 'N/A'}
+            td #{t.transaction_date}
+            td
+              a(href='/goals/' + t.goal_id) View goal
+  else
     p No transactions found.

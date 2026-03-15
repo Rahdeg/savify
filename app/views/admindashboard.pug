@@ -3,18 +3,25 @@ extends layout
 block content
   h1 Welcome Super Admin
 
-  h3 Total Savings: £#{Total_Savings}
-  h3 Total Project: #{Total_users}
-  h3 This month saved: £#{Total_goals}
+  h3 Total Savings: £#{stats.total_savings}
+  h3 Total Users: #{stats.total_users}
+  h3 Total Goals: #{stats.total_goals}
+  h3 Total Withdrawals: #{stats.total_withdrawals}
 
   h3 Users 
   table 
+      thead
+        tr
+          th Name
+          th Active Goals
+          th Inactive Goals
+          th Total Goals
       tbody
         each user in users
           tr
-            td #{user.Fullname}
+            td #{user.full_name}
             td #{user.active_goals}
             td #{user.inactive_goals}
-            td #{user.withdrawals}
+            td #{user.total_goals}
   else
     p User is registered yet. 

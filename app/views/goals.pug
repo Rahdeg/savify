@@ -12,7 +12,7 @@ block content
         p Current Amount: £#{goal.current_amount}
         p Withdrawal date: #{goal.end_date}
         p Status: #{goal.goal_status}
-      p goals description
+        a(href='/goals/' + goal.goal_id) See goal details
 
   else
     p No goals found.
