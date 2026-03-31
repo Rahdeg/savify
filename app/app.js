@@ -1,12 +1,30 @@
 // Import express.js
 const express = require("express");
+var session = require("express-session");
 const userRoutes = require("./routes/userRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const authRoutes = require("./routes/authRoutes");
 const { formatDate, formatDateTime } = require("./utils/formatDate");
 
 // Create express app
 var app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(
+  session({
+    secret: "secretkeysdfjsflyoifasd",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  }),
+);
+
+app.use((req, res, next) => {
+  res.locals.sessionUser = req.session?.user || null;
+  next();
+});
+
 // Use the Pug templating engine
 app.set("view engine", "pug");
 app.set("views", "./app/views");
@@ -19,6 +37,7 @@ app.locals.formatDateTime = formatDateTime;
 app.use("/", userRoutes);
 app.use("/goals", goalRoutes);
 app.use("/admin", adminRoutes);
+app.use("/auth", authRoutes);
 
 // Add static files location
 app.use(express.static("static"));

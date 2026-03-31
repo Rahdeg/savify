@@ -12,14 +12,23 @@ html(lang="en")
                 h1(class="text-2xl font-semibold") Welcome to Savify
                 nav
                     ul(class="flex items-center gap-2 sm:gap-3")
-                        li
-                            a.nav-link(href="/dashboard") Dashboard
-                        li
-                            a.nav-link(href="/goals") Goals
-                        li
-                            a.nav-link(href="/transactions") Transactions
-                        li
-                            a.nav-link(href="/admin/dashboard") Admin Dashboard
+                        if sessionUser
+                            li
+                                a.nav-link(href="/dashboard") Dashboard
+                            li
+                                a.nav-link(href="/goals") Goals
+                            li
+                                a.nav-link(href="/transactions") Transactions
+                            if sessionUser.role === "admin"
+                                li
+                                    a.nav-link(href="/admin/dashboard") Admin Dashboard
+                            li
+                                a.nav-link(href="/auth/logout") Logout
+                        else
+                            li
+                                a.nav-link(href="/auth/login") Login
+                            li
+                                a.nav-link(href="/auth/register") Register
 
             main
                 block content

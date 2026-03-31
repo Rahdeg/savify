@@ -10,10 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "express-session": "^1.19.0",
+    "mailjs": "^0.1.18",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.0",
+    "nodemailer": "^8.0.4",
     "pug": "^3.0.3",
     "sqlite3": "^5.0.2",
     "supervisor": "^0.12.0"

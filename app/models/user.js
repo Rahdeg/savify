@@ -1,8 +1,10 @@
 const db = require("../services/db");
+const bcrypt = require("bcryptjs");
 const { Goal } = require("./goal");
 
 class User {
   user_id;
+  email;
   profile;
   dashboard;
   activities = [];
@@ -12,22 +14,84 @@ class User {
   hasLoadedGoals = false;
   hasLoadedTransactions = false;
 
-  constructor(userId) {
-    this.user_id = Number(userId);
+  constructor(userIdentifier) {
+    const parsedId = Number(userIdentifier);
+    if (Number.isInteger(parsedId) && parsedId > 0) {
+      this.user_id = parsedId;
+      this.email = null;
+      return;
+    }
+
+    this.user_id = null;
+    this.email =
+      typeof userIdentifier === "string"
+        ? userIdentifier.trim().toLowerCase()
+        : null;
   }
 
   async getProfile() {
     if (!this.profile) {
-      const sql = `
-        SELECT full_name, email, created_at
-        FROM users
-        WHERE user_id = ?
-      `;
-      const results = await db.query(sql, [this.user_id]);
+      if (!this.user_id && !this.email) return null;
+
+      const sql = this.user_id
+        ? "SELECT * FROM users WHERE user_id = ?"
+        : "SELECT * FROM users WHERE email = ?";
+      const params = [this.user_id || this.email];
+
+      const results = await db.query(sql, params);
       this.profile = results[0] || null;
+
+      if (this.profile) {
+        this.user_id = this.profile.user_id;
+        this.email = this.profile.email;
+      }
     }
     return this.profile;
   }
+
+  // Get an existing user id from an email address, or return false if not found
+  async getIdFromEmail() {
+    var sql = "SELECT id FROM Users WHERE Users.email = ?";
+    const result = await db.query(sql, [this.email]);
+    // TODO LOTS OF ERROR CHECKS HERE..
+    if (JSON.stringify(result) != "[]") {
+      this.id = result[0].id;
+      return this.id;
+    } else {
+      return false;
+    }
+  }
+
+  // Add a password to an existing user
+  async setUserPassword(password) {
+    const pw = await bcrypt.hash(password, 10);
+    var sql = "UPDATE Users SET password = ? WHERE Users.id = ?";
+    const result = await db.query(sql, [pw, this.id]);
+    return true;
+  }
+
+  // Add a new record to the users table
+  async addUser(password, fullName = null, occupation = null) {
+    if (!this.email || !password) return false;
+
+    const existingSql = "SELECT user_id FROM users WHERE email = ? LIMIT 1";
+    const existing = await db.query(existingSql, [this.email]);
+    if (existing.length > 0) return false;
+
+    const pw = await bcrypt.hash(password, 10);
+    const defaultName = fullName || this.email.split("@")[0] || "New User";
+
+    const sql = `
+      INSERT INTO users (full_name, email, occupation, password_hash, role, is_verified)
+      VALUES (?, ?, ?, ?, 'user', 0)
+    `;
+    const result = await db.query(sql, [defaultName, this.email, occupation, pw]);
+    this.user_id = result.insertId;
+    return true;
+  }
+
+  // Test a submitted password against a stored password
+  async authenticate(submitted) {}
 
   async getDashboard() {
     // Reuse model data if already loaded to avoid another query.

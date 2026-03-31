@@ -1,0 +1,46 @@
+extends auth-layout
+
+block authContent
+  h1.auth-title Verify your email
+  p.auth-subtitle Enter the 4-digit OTP sent to your email.
+
+  if info
+    .auth-alert.auth-alert-info= info
+  if error
+    .auth-alert.auth-alert-error= error
+
+  form.auth-form(action='/auth/verify' method='POST')
+    input(type='hidden' name='email' value=email)
+
+    label(for='otp') OTP code
+    .otp-row
+      input.otp-input(type='text' name='otp1' maxlength='1' inputmode='numeric' required)
+      input.otp-input(type='text' name='otp2' maxlength='1' inputmode='numeric' required)
+      input.otp-input(type='text' name='otp3' maxlength='1' inputmode='numeric' required)
+      input.otp-input(type='text' name='otp4' maxlength='1' inputmode='numeric' required)
+
+    button.auth-btn(type='submit') Verify email
+
+  form.auth-inline-form(action='/auth/resend-otp' method='POST')
+    input(type='hidden' name='email' value=email)
+    button.auth-link-btn(type='submit') Resend OTP
+
+  p.auth-switch
+    a(href='/auth/login') Back to login
+
+  script.
+    const otpInputs = document.querySelectorAll('.otp-input');
+    otpInputs.forEach((input, index) => {
+      input.addEventListener('input', (event) => {
+        event.target.value = event.target.value.replace(/\D/g, '').slice(0, 1);
+        if (event.target.value && index < otpInputs.length - 1) {
+          otpInputs[index + 1].focus();
+        }
+      });
+
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Backspace' && !input.value && index > 0) {
+          otpInputs[index - 1].focus();
+        }
+      });
+    });

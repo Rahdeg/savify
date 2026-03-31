@@ -6,3 +6,9 @@ MYSQL_DATABASE=sd2-db
 MYSQL_ROOT_USER=root
 DB_CONTAINER=db
 DB_PORT=3306
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=yourgmail@gmail.com
+SMTP_PASS=your_app_password
+SMTP_FROM="Savify <yourgmail@gmail.com>"

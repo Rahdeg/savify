@@ -1,0 +1,18 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title #{title}
+    link(rel="stylesheet", href="/css/style.css")
+    link(rel="stylesheet", href="/css/auth.css")
+  body(class="auth-page")
+    .auth-screen
+      .auth-card
+        .auth-left
+          block authContent
+        .auth-right
+          .auth-image-placeholder
+          h3.auth-right-title Save smarter with Savify
+          p.auth-right-text
+            | Build your goals, track progress, and stay in control of your money.
