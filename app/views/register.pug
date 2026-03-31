@@ -1,0 +1,28 @@
+extends auth-layout
+
+block authContent
+    h1.auth-title Create your account
+    if error
+        .auth-alert.auth-alert-error= error
+
+    form.auth-form(action='/auth/register' method='POST')
+        label(for='full_name') Full name
+        input(type='text' name='full_name' id='full_name' required)
+
+        label(for='email') Email
+        input(type='email' name='email' id='email' required)
+
+        label(for='occupation') Occupation
+        input(type='text' name='occupation' id='occupation' placeholder='e.g. Student, Engineer, Teacher')
+
+        label(for='password') Password
+        input(type='password' name='password' id='password' required)
+
+        label(for='confirm_password') Confirm password
+        input(type='password' name='confirm_password' id='confirm_password' required)
+
+        button.auth-btn(type='submit') Sign up
+
+    p.auth-switch
+        | Already have an account?
+        a(href='/auth/login') Sign in

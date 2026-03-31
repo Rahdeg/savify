@@ -2,8 +2,9 @@ const { User } = require("../models/user");
 
 exports.showDashboard = async (req, res) => {
   try {
-    // Step 1: Pick current user ID (replace with auth user later).
-    const userId = 3;
+    // Step 1: Get current logged-in user ID from session.
+    const userId = req.session?.user?.user_id;
+    if (!userId) return res.redirect("/auth/login");
 
     // Step 2: Create one User model object.
     const user = new User(userId);
@@ -27,8 +28,9 @@ exports.showDashboard = async (req, res) => {
 
 exports.showTransactions = async (req, res) => {
   try {
-    // Step 1: Pick current user ID (replace with auth user later).
-    const userId = 3;
+    // Step 1: Get current logged-in user ID from session.
+    const userId = req.session?.user?.user_id;
+    if (!userId) return res.redirect("/auth/login");
 
     // Step 2: Create one User model object.
     const user = new User(userId);

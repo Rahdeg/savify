@@ -1,0 +1,21 @@
+extends auth-layout
+
+block authContent
+    h1.auth-title Sign in to Savify
+    if info
+        .auth-alert.auth-alert-info= info
+    if error
+        .auth-alert.auth-alert-error= error
+
+    form.auth-form(action='/auth/login' method='POST')
+        label(for='email') Email
+        input(type='email' name='email' id='email' required)
+
+        label(for='password') Password
+        input(type='password' name='password' id='password' required)
+
+        button.auth-btn(type='submit') Sign in
+
+    p.auth-switch
+        | Don’t have an account?
+        a(href='/auth/register') Register
