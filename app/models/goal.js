@@ -63,6 +63,32 @@ class Goal {
     return this;
   }
 
+
+async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_date, category_id, current_amount, target_amount, saving_frequency, start_date, end_date, agreed_terms }) {
+  const sql = `
+    INSERT INTO savings_goal (user_id, goal_title, goal_description, scheduled_withdrawal_date, category_id, current_amount, target_amount, saving_frequency, start_date, end_date, agreed_terms)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  
+  const params = [
+    userId,
+    goal_title,
+    goal_description,
+    scheduled_withdrawal_date,
+    category_id,
+    current_amount,
+    target_amount,
+    saving_frequency,
+    start_date,
+    end_date,
+    agreed_terms,
+  ].map((p) => (p === undefined ? null : p));
+
+  const result = await db.query(sql, params);
+  this.goal_id = result.insertId;
+  return this.goal_id;
+}
+
   async getTransactions() {
     if (this.transactions.length) return this.transactions;
 

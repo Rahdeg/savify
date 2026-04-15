@@ -1,0 +1,56 @@
+
+div#createGoalModal.hidden.fixed.inset-0.z-50.flex.items-center.justify-center.bg-black.bg-opacity-50
+  div.bg-white.w-full.max-w-lg.mx-4.rounded-xl.shadow-lg.p-6.relative.overflow
+
+    button.absolute.top-3.right-3.text-gray-500(
+      type="button",
+      onclick="closeCreateGoalModal()"
+    ) ✕
+
+    h2.text-xl.font-semibold.mb-4 Create Savings Goal
+
+    p#goalModalMessage.hidden.text-sm.mb-3
+
+    form#createGoalForm(method="POST", action="/goals/create")
+
+      div.mb-3
+        label.block.text-sm.font-medium Title
+        input#title(type="text", name="title", required, minlength="3", class="w-full border rounded p-2 mt-1")
+      div.mb-3
+        label.block.text-sm.font-medium Description
+        textarea#description(name="description", class="w-full border rounded p-2 mt-1")
+      div.mb-3
+        label.block.text-sm.font-medium Category
+        select#category(name="category", required, class="w-full border rounded p-2 mt-1")
+          option(value="") Select category
+          each cat in categories
+            option(value=cat.category_id)= cat.category_name
+
+      div.mb-3
+        label.block.text-sm.font-medium Amount (£)
+        input#amount(type="number", name="amount", min="1", step="0.01", required, class="w-full border rounded p-2 mt-1")
+
+      div.mb-3
+        label.block.text-sm.font-medium Duration
+        select(name="duration", required, class="w-full border rounded p-2 mt-1")
+          option(value="") Select duration
+          option(value="weekly") Weekly
+          option(value="monthly") Monthly
+          option(value="quarterly") Quarterly (every 3 months)
+          option(value="yearly") Yearly (every 12 months)
+
+      div.mb-3.flex.gap-4
+        div.w-full
+          label.block.text-sm.font-medium Start Date
+          input#startDate(type="date", name="start_date", required, class="w-full border rounded p-2 mt-1")
+        div.w-full
+          label.block.text-sm.font-medium End Date
+          input#endDate(type="date", name="end_date", required, class="w-full border rounded p-2 mt-1")
+
+      div.flex.items-center.gap-2.mb-4
+        input#terms(type="checkbox", name="agreed_terms", required)
+        label(for="terms", class="text-sm") I agree to the terms and conditions
+
+      button#submitGoalBtn(type="submit", class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700") Create Goal
+    
+  // modal script is included in layout.pug; no local include here to avoid double-loading

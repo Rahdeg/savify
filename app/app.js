@@ -1,16 +1,19 @@
 // Import express.js
 const express = require("express");
+const path = require('path');
 var session = require("express-session");
 const userRoutes = require("./routes/userRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/authRoutes");
 const { formatDate, formatDateTime } = require("./utils/formatDate");
+const Category = require("./models/category");
 
 // Create express app
 var app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   session({
     secret: "secretkeysdfjsflyoifasd",
@@ -20,9 +23,19 @@ app.use(
   }),
 );
 
+
 app.use((req, res, next) => {
   res.locals.sessionUser = req.session?.user || null;
   next();
+});
+
+app.use(async (req, res, next) => {
+  try {
+    res.locals.categories = await Category.getAllCategories();
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Use the Pug templating engine
