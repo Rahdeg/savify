@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 const goalController = require("../controllers/goal.controller");
 const categoryController = require("../controllers/category.controller");
+const { requireAuth } = require("../middleware/auth");
 
-router.get("/", goalController.listGoals);
-router.get("/categories", categoryController.showCategories);
-router.post("/create", goalController.createGoal);
+router.get("/", requireAuth, goalController.listGoals);
+router.get("/categories", requireAuth, categoryController.showCategories);
+router.post("/create", requireAuth, goalController.createGoal);
 router.get("/:id", goalController.showGoalDetails);
 router.get("/:id/transactions", goalController.showTransactions);
 

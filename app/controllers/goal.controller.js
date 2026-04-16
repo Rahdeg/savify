@@ -1,7 +1,7 @@
 const { Goal } = require("../models/goal");
 const { User } = require("../models/user");
 
-exports.listGoals = async (req, res) => {
+exports.listGoals = async (_req, res) => {
   try {
     // Step 1: Pick the current user ID (replace later with logged-in user ID).
     const userId = 3;
@@ -45,16 +45,12 @@ exports.showGoalDetails = async (req, res) => {
 };
 
 exports.createGoal = async (req, res) => {
-  let goal_status = false;
-  let withdrawal_date;
-
   try {
     // const userId = req.session?.user?.user_id || 3; // this is a temporary hardcoded value for testing until we implement dynamic session user assignment on login
     const userId = req.session?.user?.user_id;
-    const { title, description, amount, category, duration, start_date, end_date, agreed_terms } = req.body;
-    const agreed_terms_boolean = agreed_terms === "on" ? true : false;
+    const { title, description, amount, category, saving_frequency, start_date, end_date, agreed_terms } = req.body;
 
-    if (!title || !description || !amount || !category || !duration || !start_date || !end_date || !agreed_terms) {
+    if (!title || !description || !amount || !category || !saving_frequency || !start_date || !end_date || !agreed_terms) {
       // return res.status(400).send("All fields are required.");
       return res.status(400).json({ error: "All fields are required." });
     }
@@ -62,30 +58,17 @@ exports.createGoal = async (req, res) => {
     // convert string to Date object once
     const startDateObj = new Date(start_date);
 
-    if (duration === "weekly") {
-      withdrawal_date = new Date(startDateObj);
-      withdrawal_date.setDate(startDateObj.getDate() + 7);
-    } else if (duration === "monthly") {
-      withdrawal_date = new Date(startDateObj);
-      withdrawal_date.setDate(startDateObj.getDate() + 30);
-    } else if (duration === "quarterly") {
-      withdrawal_date = new Date(startDateObj);
-      withdrawal_date.setDate(startDateObj.getDate() + 90);
-    } else if (duration === "yearly") {
-      withdrawal_date = new Date(startDateObj);
-      withdrawal_date.setDate(startDateObj.getDate() + 365);
-    } else {
-      return res.status(400).json({ error: "Invalid duration selected." });
-      // return res.status(400).send("Invalid duration selected.");
+    const validFrequencies = ["daily", "weekly", "monthly"];
+    if (!validFrequencies.includes(saving_frequency)) {
+      return res.status(400).json({ error: "Invalid saving frequency selected." });
     }
 
-    const withdrawal_date_formatted = withdrawal_date.toISOString().split("T")[0];
+    // The withdrawal date is when the goal matures — that's the end date the user chose.
+    // saving_frequency only describes how often the user makes deposits.
+    const withdrawal_date_formatted = end_date;
 
     if (new Date(end_date) <= startDateObj) {
-      // return res.status(400).send("End date must be after start date.");
       return res.status(400).json({ error: "End date must be after start date." });
-    } else {
-      goal_status = true;
     }
 
     const goal = new Goal();
@@ -95,13 +78,12 @@ exports.createGoal = async (req, res) => {
       goal_description: description,
       scheduled_withdrawal_date: withdrawal_date_formatted,
       category_id: category,
-      current_amount: amount,
+      current_amount: 0,
       target_amount: amount,
-      saving_frequency: duration,
+      saving_frequency,
       start_date,
       end_date,
-      agreed_terms: agreed_terms_boolean,
-      goal_status
+      goal_status: "active",
     });
 
     // return res.status(201).send({ 

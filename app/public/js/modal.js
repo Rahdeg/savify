@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function showMessage(text, type) {
     if (!msgEl) return;
-    msgEl.textContent = '';
+    msgEl.textContent = text;
     // reset visibility and styling
     msgEl.classList.remove('hidden',
       // color classes we may add below
@@ -58,45 +58,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // escape text to prevent HTML injection when inserting user/server strings
-  function escapeHtml(unsafe) {
-    return String(unsafe)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  // Convert YYYY-MM-DD to human readable with ordinal day, e.g. "29th of April 2026"
-  function formatHumanDate(dateStr) {
-    if (!dateStr) return '';
-    // Validate simple YYYY-MM-DD
-    if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(dateStr)) return escapeHtml(dateStr);
-    const [y, m, d] = dateStr.split('-');
-    const day = Number(d);
-    if (Number.isNaN(day)) return escapeHtml(dateStr);
-
-    function ordinal(n) {
-      const v = n % 100;
-      if (v >= 11 && v <= 13) return 'th';
-      switch (n % 10) {
-        case 1: return 'st';
-        case 2: return 'nd';
-        case 3: return 'rd';
-        default: return 'th';
-      }
-    }
-
-    const monthNames = [
-      'January','February','March','April','May','June',
-      'July','August','September','October','November','December'
-    ];
-    const monthIndex = Number(m) - 1;
-    const monthName = monthNames[monthIndex] || m;
-
-    return `${day}${ordinal(day)} of ${monthName} ${y}`;
-  }
 
   if (form) {
     form.addEventListener('submit', async function (e) {
@@ -120,20 +81,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!res.ok) {
           showMessage(data.error || data.message || 'An error occurred', 'error');
         } else {
-          // show success and include formatted bold withdrawal date when present
-          const rawDate = data && data.scheduled_withdrawal_date;
-          if (rawDate) {
-            const human = formatHumanDate(rawDate);
-            // build safe HTML: escape the human text, wrap in <strong>
-            const safeText = escapeHtml(data.message || 'Goal created successfully');
-            msgEl.innerHTML = `${safeText}, your scheduled withdrawal date is <strong>${escapeHtml(human)}</strong>`;
-            // apply success styling
-            msgEl.classList.remove('hidden');
-            msgEl.classList.add('p-2', 'rounded', 'text-green-700', 'bg-green-100');
-          } else {
-            showMessage(data.message || 'Goal created successfully', 'info');
-          }
           form.reset();
+          window.closeCreateGoalModal();
+          window.location.href = '/goals';
         }
       } catch (err) {
         showMessage(err.message || 'Network error', 'error');

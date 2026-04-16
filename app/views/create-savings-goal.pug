@@ -1,6 +1,6 @@
 
 div#createGoalModal.hidden.fixed.inset-0.z-50.flex.items-center.justify-center.bg-black.bg-opacity-50
-  div.bg-white.w-full.max-w-lg.mx-4.rounded-xl.shadow-lg.p-6.relative.overflow
+  div.bg-white.w-full.max-w-lg.mx-4.rounded-xl.shadow-lg.p-6.relative.overflow-y-auto
 
     button.absolute.top-3.right-3.text-gray-500(
       type="button",
@@ -18,7 +18,7 @@ div#createGoalModal.hidden.fixed.inset-0.z-50.flex.items-center.justify-center.b
         input#title(type="text", name="title", required, minlength="3", class="w-full border rounded p-2 mt-1")
       div.mb-3
         label.block.text-sm.font-medium Description
-        textarea#description(name="description", class="w-full border rounded p-2 mt-1")
+        textarea#description(name="description", class="w-full border rounded p-2 mt-1", required)
       div.mb-3
         label.block.text-sm.font-medium Category
         select#category(name="category", required, class="w-full border rounded p-2 mt-1")
@@ -31,13 +31,12 @@ div#createGoalModal.hidden.fixed.inset-0.z-50.flex.items-center.justify-center.b
         input#amount(type="number", name="amount", min="1", step="0.01", required, class="w-full border rounded p-2 mt-1")
 
       div.mb-3
-        label.block.text-sm.font-medium Duration
-        select(name="duration", required, class="w-full border rounded p-2 mt-1")
-          option(value="") Select duration
+        label.block.text-sm.font-medium Saving Frequency
+        select(name="saving_frequency", required, class="w-full border rounded p-2 mt-1")
+          option(value="") Select frequency
+          option(value="daily") Daily
           option(value="weekly") Weekly
           option(value="monthly") Monthly
-          option(value="quarterly") Quarterly (every 3 months)
-          option(value="yearly") Yearly (every 12 months)
 
       div.mb-3.flex.gap-4
         div.w-full

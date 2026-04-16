@@ -29,13 +29,19 @@ app.use((req, res, next) => {
   next();
 });
 
+const _categoriesCache = { data: null, expiresAt: 0 };
+
 app.use(async (req, res, next) => {
   try {
-    res.locals.categories = await Category.getAllCategories();
-    next();
+    if (Date.now() > _categoriesCache.expiresAt) {
+      _categoriesCache.data = await Category.getAllCategories();
+      _categoriesCache.expiresAt = Date.now() + 60_000; // 60-second TTL
+    }
+    res.locals.categories = _categoriesCache.data;
   } catch (err) {
-    next(err);
+    res.locals.categories = [];
   }
+  next();
 });
 
 // Use the Pug templating engine
