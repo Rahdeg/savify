@@ -1,12 +1,14 @@
 const { Goal } = require("../models/goal");
 const { User } = require("../models/user");
 
-exports.listGoals = async (_req, res) => {
+exports.listGoals = async (req, res) => {
   try {
-    // Step 1: Pick the current user ID (replace later with logged-in user ID).
-    const userId = 3;
+    const userId = req.session?.user?.user_id;
 
-    // Step 2: Create a collection model and load all goals for this user.
+    if (!userId) {
+      return res.redirect("/auth/login");
+    }
+
     const user = new User(userId);
     await user.getGoals();
 
