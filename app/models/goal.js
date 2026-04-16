@@ -64,12 +64,12 @@ class Goal {
   }
 
 
-async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_date, category_id, current_amount, target_amount, saving_frequency, start_date, end_date, agreed_terms }) {
+async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_date, category_id, current_amount, target_amount, saving_frequency, start_date, end_date }) {
   const sql = `
-    INSERT INTO savings_goal (user_id, goal_title, goal_description, scheduled_withdrawal_date, category_id, current_amount, target_amount, saving_frequency, start_date, end_date, agreed_terms)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO savings_goal (user_id, goal_title, goal_description, scheduled_withdrawal_date, category_id, current_amount, target_amount, saving_frequency, start_date, end_date)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
-  
+
   const params = [
     userId,
     goal_title,
@@ -81,7 +81,6 @@ async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_da
     saving_frequency,
     start_date,
     end_date,
-    agreed_terms,
   ].map((p) => (p === undefined ? null : p));
 
   const result = await db.query(sql, params);
