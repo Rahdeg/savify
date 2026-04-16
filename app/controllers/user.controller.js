@@ -4,7 +4,10 @@ exports.showDashboard = async (req, res) => {
   try {
     // Step 1: Get current logged-in user ID from session.
     const userId = req.session?.user?.user_id;
+    // const userId = req.session?.user?.user_id || "3"; // this is a temporary hardcoded value for testing until we implement dynamic session user assignment on login
+    // console.log("Dashboard accessed by user ID:", userId);
     if (!userId) return res.redirect("/auth/login");
+    
 
     // Step 2: Create one User model object.
     const user = new User(userId);
