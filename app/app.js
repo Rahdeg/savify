@@ -1,5 +1,6 @@
 // Import express.js
 const express = require("express");
+const session = require("express-session");
 const userRoutes = require("./routes/userRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -10,6 +11,20 @@ var app = express();
 // Use the Pug templating engine
 app.set("view engine", "pug");
 app.set("views", "./app/views");
+
+// Parse form submissions
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Session middleware — must come before routes
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "savify-dev-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false },
+  })
+);
 
 // Make date helpers available in every Pug template
 app.locals.formatDate = formatDate;

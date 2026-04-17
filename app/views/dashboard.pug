@@ -1,39 +1,93 @@
 extends layout
 
 block content
-  h1  Welcome #{profile.full_name}!
+  section(class="space-y-6")
 
-  - const totalSavings = goals.reduce((sum, g) => sum + (parseFloat(g.current_amount) || 0), 0)
-  h3 Total Savings: £#{totalSavings.toFixed(2)}
-  h3 Total Goals: #{goals.length}
-  - console.log(goals)
-  if goals && goals.length
-    each goal in goals
-      h2 #{goal.goal_title}
-      p Overview
+    //- ── Welcome banner ──────────────────────────────────────────────────────
+    .card(class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3")
+      div
+        h1(class="text-2xl font-bold") Welcome back, #{profile.full_name}!
+        p(class="text-slate-500 text-sm mt-1") Here is your savings overview.
+      a.nav-link(href="/goals") + New Goal
 
-      div(class="my-2 nav-link")
-        a(href="/goals") View goals
-  else
-    p No goals found.
+    //- ── Summary stats ───────────────────────────────────────────────────────
+    - const totalSavings = goals.reduce((sum, g) => sum + (parseFloat(g.current_amount) || 0), 0)
+    - const totalTarget  = goals.reduce((sum, g) => sum + (parseFloat(g.target_amount)  || 0), 0)
+    - const activeGoals  = goals.filter(g => g.goal_status === 'active').length
+    - const overallPct   = totalTarget > 0 ? Math.min(100, Math.round((totalSavings / totalTarget) * 100)) : 0
 
-  h3 Recent Activity
-  - console.log(activities)
-  if activities 
-    table
-      thead
-        tr
-          th Activity
-          th Message
+    .grid(class="grid-cols-2 sm:grid-cols-4 gap-4")
+      .card.text-center
+        p(class="text-slate-500 text-sm mb-1") Total Saved
+        p(class="text-2xl font-bold text-emerald-600") £#{totalSavings.toFixed(2)}
+      .card.text-center
+        p(class="text-slate-500 text-sm mb-1") Total Goals
+        p(class="text-2xl font-bold") #{goals.length}
+      .card.text-center
+        p(class="text-slate-500 text-sm mb-1") Active Goals
+        p(class="text-2xl font-bold text-blue-600") #{activeGoals}
+      .card.text-center
+        p(class="text-slate-500 text-sm mb-1") Overall Progress
+        p(class="text-2xl font-bold text-amber-600") #{overallPct}%
 
-      tbody
-        each activity in activities
-          tr
-            td #{activity.activity_type}
-            td #{activity.activity_message}
+    //- ── Goals ───────────────────────────────────────────────────────────────
+    h2(class="text-lg font-semibold") Your Savings Goals
 
-          tr
-            td #{activity.activity_id}
-            td #{formatDateTime(activity.created_at)}
-  else
-    p No recent activity founds.
+    if goals && goals.length
+      .grid(class="grid-cols-1 md:grid-cols-2 gap-4")
+        each goal in goals
+          - const pct = goal.progressPercent
+          - const isActive    = goal.goal_status === 'active'
+          - const isCompleted = goal.goal_status === 'completed'
+          - const badgeCls = isActive ? 'bg-emerald-100 text-emerald-700' : isCompleted ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
+          - const barCls   = isCompleted ? 'bg-blue-500' : pct >= 75 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-400' : 'bg-rose-400'
+
+          article.card
+            //- Header row: title + status badge
+            .flex.justify-between.items-start.mb-2
+              h3(class="font-semibold text-base leading-snug") #{goal.goal_title}
+              span(class=`text-xs font-medium px-2 py-0.5 rounded-full ${badgeCls}`) #{goal.goal_status}
+
+            //- Category
+            if goal.category_name
+              p(class="text-xs text-slate-400 mb-3") #{goal.category_name}
+
+            //- Progress bar
+            .flex.justify-between.text-sm.mb-1
+              span(class="text-slate-600") £#{parseFloat(goal.current_amount).toFixed(2)} saved
+              span(class="font-semibold") #{pct}%
+            .w-full.bg-slate-200.rounded-full(style="height:8px; margin-bottom:0.5rem")
+              div(class=`${barCls} rounded-full` style=`height:8px; width:${pct}%`)
+            p(class="text-xs text-slate-500 mb-1") Target: £#{parseFloat(goal.target_amount).toFixed(2)}
+
+            //- End date
+            if goal.end_date
+              p(class="text-xs text-slate-400 mb-3") By #{formatDate(goal.end_date)}
+
+            a.link-text(href=`/goals/${goal.goal_id}`) View details →
+
+    else
+      .card
+        p(class="text-slate-500 mb-2") You have no savings goals yet.
+        a.link-text(href="/goals") Create your first goal
+
+    //- ── Recent Activity ─────────────────────────────────────────────────────
+    h2(class="text-lg font-semibold") Recent Activity
+
+    if activities && activities.length
+      .table-wrap
+        table.app-table
+          thead
+            tr
+              th Activity
+              th Details
+              th Date
+          tbody
+            each activity in activities
+              tr
+                td #{activity.activity_type}
+                td #{activity.activity_message}
+                td #{formatDateTime(activity.created_at)}
+    else
+      .card
+        p(class="text-slate-500") No recent activity.

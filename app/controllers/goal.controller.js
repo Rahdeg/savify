@@ -3,16 +3,14 @@ const { User } = require("../models/user");
 
 exports.listGoals = async (req, res) => {
   try {
-    // Step 1: Pick the current user ID (replace later with logged-in user ID).
-    const userId = 3;
+    const userId = req.session.userId;
+    if (!userId) return res.redirect("/");
 
-    // Step 2: Create a collection model and load all goals for this user.
     const user = new User(userId);
     await user.getGoals();
 
-    // Step 3: Send mapped model objects to the view.
     res.render("goals", {
-      title: "My Savings Goals",
+      title: "My Savings Goals – Savify",
       fetchedGoals: user.goals,
     });
   } catch (err) {
@@ -22,20 +20,24 @@ exports.listGoals = async (req, res) => {
 
 exports.showGoalDetails = async (req, res) => {
   try {
-    // Step 1: Build one Goal model from route param.
+    const userId = req.session.userId;
+    if (!userId) return res.redirect("/");
+
     const goalId = req.params.id;
     const goal = new Goal(goalId);
 
-    // Step 2: Load this goal's details from DB.
     const goalDetails = await goal.getGoalDetails();
     if (!goalDetails) return res.status(404).send("Goal not found");
 
-    // Step 3: Load this goal's related transactions.
+    // Ensure the goal belongs to the logged-in user
+    if (goalDetails.user_id && goalDetails.user_id !== userId) {
+      return res.status(403).send("Access denied");
+    }
+
     await goal.getTransactions();
 
-    // Step 4: Render single-goal page.
     res.render("goal-details", {
-      title: "Goal Details",
+      title: `${goal.goal_title} – Savify`,
       goal,
       transactions: goal.transactions,
     });
