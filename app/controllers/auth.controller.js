@@ -124,7 +124,10 @@ exports.login = async (req, res) => {
     // OPTIONAL: examine the session in the console
     console.log(req.session, "Session after login");
 
-    return res.redirect("/dashboard");
+    if (user.role === "admin") {
+  return res.redirect("/admin/dashboard");
+}
+return res.redirect("/dashboard");
   } catch (err) {
     return res.render("login", {
       title: "Login",

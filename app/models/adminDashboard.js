@@ -67,6 +67,33 @@ class AdminDashboard {
 
     return this.users;
   }
+  async getGoalStatusBreakdown() {
+  const sql = `
+    SELECT
+      SUM(CASE WHEN goal_status = 'active' THEN 1 ELSE 0 END) AS active_goals,
+      SUM(CASE WHEN goal_status = 'completed' THEN 1 ELSE 0 END) AS completed_goals,
+      SUM(CASE WHEN goal_status = 'withdrawn' THEN 1 ELSE 0 END) AS withdrawn_goals,
+      SUM(CASE WHEN goal_status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_goals
+    FROM savings_goal
+  `;
+  const results = await db.query(sql, []);
+  this.goalBreakdown = results[0] || {};
+  return this.goalBreakdown;
+}
+
+async getMonthlyContributions() {
+  const sql = `
+    SELECT
+      DATE_FORMAT(transaction_date, '%Y-%m') AS month,
+      SUM(amount) AS total
+    FROM transactions
+    WHERE transaction_type = 'deposit'
+    GROUP BY month
+    ORDER BY month ASC
+  `;
+  this.monthlyContributions = await db.query(sql, []);
+  return this.monthlyContributions;
+}
 }
 
 module.exports = {

@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/admin.controller");
+// const { isAdmin } = require("../middleware/isAdmin");
+const { isAdmin } = require("../middleware/isadmin");
 
-router.get("/dashboard", adminController.showAdminDashboard);
+// Protect ALL admin routes with isAdmin middleware
+router.get("/dashboard", isAdmin, adminController.showAdminDashboard);
 
 module.exports = router;

@@ -131,4 +131,26 @@ exports.showTransactions = async (req, res) => {
   } catch (err) {
     return res.status(500).send(err.message);
   }
+  exports.withdrawGoal = async (req, res) => {
+  try {
+    // Step 1: Get goal ID from URL and reason from form body
+    const goalId = req.params.id;
+    const { reason_for_withdrawal } = req.body;
+
+    // Step 2: Load the goal model
+    const goal = new Goal(goalId);
+
+    // Step 3: Call the withdraw method — handles all DB logic
+    const result = await goal.withdraw(reason_for_withdrawal);
+
+    // Step 4: Redirect back to goal details with success message
+    req.session.successMessage = `Withdrawal of £${result.amount} successful! Reference: ${result.reference}`;
+    res.redirect(`/goals/${goalId}`);
+
+  } catch (err) {
+    // If not eligible or DB error, redirect back with error
+    req.session.errorMessage = err.message;
+    res.redirect(`/goals/${req.params.id}`);
+  }
+};
 };
