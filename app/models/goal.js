@@ -118,9 +118,9 @@ async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_da
   await this.getGoalDetails();
 
   // Step 2: Check eligibility — must be completed
-  if (this.goal_status !== 'completed') {
-    throw new Error('Goal is not eligible for withdrawal. It must be completed first.');
-  }
+  // if (this.goal_status !== 'completed') {
+  //   throw new Error('Goal is not eligible for withdrawal. It must be completed first.');
+  // } //   this will be uncommented later.
 
   const amount = this.current_amount;
   const reference = 'WDR' + Date.now();

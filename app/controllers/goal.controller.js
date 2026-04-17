@@ -40,6 +40,7 @@ exports.showGoalDetails = async (req, res) => {
       title: "Goal Details",
       goal,
       transactions: goal.transactions,
+      session: req.session,
     });
   } catch (err) {
     return res.status(500).send(err.message);
@@ -69,16 +70,17 @@ exports.createGoal = async (req, res) => {
     // saving_frequency only describes how often the user makes deposits.
     const withdrawal_date_formatted = end_date;
 
-    if (new Date(end_date) <= startDateObj) {
-      return res.status(400).json({ error: "End date must be after start date." });
-    }
+    // if (new Date(end_date) <= startDateObj) {
+    //   return res.status(400).json({ error: "End date must be after start date." });
+    // } //  this will be uncommented later once we implement the withdrawal flow and can use the actual end date as the scheduled withdrawal date
 
     const goal = new Goal();
     await goal.createGoal({
       userId,
       goal_title: title,
       goal_description: description,
-      scheduled_withdrawal_date: withdrawal_date_formatted,
+      // scheduled_withdrawal_date: withdrawal_date_formatted,
+      scheduled_withdrawal_date: "2026-04-17", // this is hardcoded for testing purposes until we implement the withdrawal flow and can use the actual end date as the scheduled withdrawal date
       category_id: category,
       current_amount: 0,
       target_amount: amount,
@@ -131,7 +133,9 @@ exports.showTransactions = async (req, res) => {
   } catch (err) {
     return res.status(500).send(err.message);
   }
-  exports.withdrawGoal = async (req, res) => {
+};
+
+exports.withdrawGoal = async (req, res) => {
   try {
     // Step 1: Get goal ID from URL and reason from form body
     const goalId = req.params.id;
@@ -152,5 +156,4 @@ exports.showTransactions = async (req, res) => {
     req.session.errorMessage = err.message;
     res.redirect(`/goals/${req.params.id}`);
   }
-};
 };

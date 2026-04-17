@@ -28,7 +28,7 @@ block content
           - delete session.errorMessage
 
         //- Withdraw button
-        if goal.goal_status === 'completed'
+        if goal.goal_status !== 'completed'
           form(action=`/goals/${goal.goal_id}/withdraw` method="POST")
             input(type="hidden" name="reason_for_withdrawal" value=goal.goal_description)
             button(type="submit" class="btn btn-dark") Withdraw
