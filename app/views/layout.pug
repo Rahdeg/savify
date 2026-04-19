@@ -1,38 +1,39 @@
-
 doctype html
 html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title #{title}
-    script(src="https://cdn.tailwindcss.com")
     link(rel="stylesheet", href="/css/style.css")
-  body(class="bg-slate-50 text-slate-800")
-    .max-w-5xl.mx-auto.px-4.py-6
 
-      header(class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6")
-        h1(class="text-2xl font-semibold") Welcome to Savify
+  body
+    if sessionUser
+      //- ── Sidebar + content ────────────────────────────────────────────
+      .page-shell
 
-        nav
-          ul(class="flex items-center gap-2 sm:gap-3")
-            if sessionUser
-              li
-                a.nav-link(href="/dashboard") Dashboard
-              li
-                button.nav-link(type="button" onclick="openCreateGoalModal()") Create Goal
-              li
-                a.nav-link(href="/goals") Goals
-              li
-                a.nav-link(href="/transactions") Transactions
-              li
-                a.nav-link(href="/auth/logout") Logout
-            else
-              li
-                a.nav-link(href="/auth/login") Login
-              li
-                a.nav-link(href="/auth/register") Register
+        aside.sidebar
+          .sidebar-brand Sav#[span ify]
+          nav.sidebar-nav
+            a.sidebar-link(href="/dashboard") Dashboard
+            a.sidebar-link(href="/goals") Goals
+            a.sidebar-link(href="/transactions") Transactions
+          .sidebar-footer
+            a.sidebar-link.sidebar-link--danger(href="/auth/logout") Log out
 
-      main
+        .page-content
+          main
+            block content
+            include create-savings-goal
+
+    else
+      //- ── Guest header ─────────────────────────────────────────────────
+      header(style="background:#fff;border-bottom:1px solid #e2e8f0;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;")
+        span(style="font-size:1.2rem;font-weight:800;color:#0f172a;") Sav#[span(style="color:#4f46e5") ify]
+        nav(style="display:flex;gap:0.5rem;")
+          a.nav-link(href="/auth/login") Login
+          a.nav-link(href="/auth/register") Register
+
+      main(style="max-width:900px;margin:0 auto;padding:1.5rem;")
         block content
         include create-savings-goal
 
