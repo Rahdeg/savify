@@ -37,6 +37,13 @@ class Goal {
     return goal;
   }
 
+  get progressPercent() {
+    const target = parseFloat(this.target_amount) || 0;
+    const current = parseFloat(this.current_amount) || 0;
+    if (target <= 0) return 0;
+    return Math.min(100, Math.round((current / target) * 100));
+  }
+
   async getGoalDetails() {
     if (this.goal_title) return this;
 

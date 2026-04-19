@@ -1,21 +1,64 @@
 extends layout
 
 block content
-  section(class='space-y-4')
-    h1(class='text-xl font-semibold') Goals
-    p(class='text-slate-600') Here you can set your savings goals and track your progress towards achieving them.
+  - const arcR   = 38
+  - const arcLen = Math.PI * arcR
 
-    if fetchedGoals && fetchedGoals.length
-      .grid(class='grid-cols-1 md:grid-cols-2 gap-4')
-        each goal in fetchedGoals
-          article.card
-            h2(class='text-lg font-semibold mb-2') #{goal.goal_title}
-            p #[span.label Target Amount:] £#{goal.target_amount}
-            p #[span.label Current Amount:] £#{goal.current_amount}
-            p #[span.label Withdrawal date:] #{formatDate(goal.end_date)}
-            p #[span.label Status:] #{goal.goal_status}
-            .mt-3
-              a.link-text(href='/goals/' + goal.goal_id) See goal details
+  .page-header
+    div
+      h1.page-title Goals
+      p.page-subtitle Here you can set your savings goals and track your progress towards achieving them.
+    button.btn-primary(type="button" onclick="openCreateGoalModal()") + New Goal
 
-    else
-      p No goals found.
+  if fetchedGoals && fetchedGoals.length
+    .goals-grid
+      each goal in fetchedGoals
+        - const pct    = goal.progressPercent
+        - const filled = (pct / 100) * arcLen
+        - const isDone = goal.goal_status === 'completed'
+        - const badgeCls = isDone ? 'badge-blue' : goal.goal_status === 'active' ? 'badge-green' : 'badge-grey'
+
+        article.goal-card
+          .goal-card-top
+            h3.goal-card-title #{goal.goal_title}
+            span(class=`badge ${badgeCls}`) #{goal.goal_status}
+
+          if goal.category_name
+            p.goal-category #{goal.category_name}
+
+          .goal-card-amounts
+            span.goal-amount £#{parseFloat(goal.current_amount).toFixed(2)}
+            span.goal-target Target: £#{parseFloat(goal.target_amount).toFixed(2)}
+
+          //- Arc gauge
+          .arc-wrap
+            svg(viewBox="0 0 100 58" width="140" height="82")
+              path(
+                d="M 12,54 A 38,38 0 0,1 88,54"
+                fill="none"
+                stroke="#e2e8f0"
+                stroke-width="12"
+                stroke-linecap="round"
+              )
+              if pct > 0
+                path(
+                  d="M 12,54 A 38,38 0 0,1 88,54"
+                  fill="none"
+                  stroke="#1e293b"
+                  stroke-width="12"
+                  stroke-linecap="round"
+                  stroke-dasharray=`${filled} ${arcLen}`
+                )
+            p.arc-pct #{pct}%
+
+          .goal-card-meta
+            if goal.end_date
+              span.goal-meta-item By #{formatDate(goal.end_date)}
+
+          a.link-text(href=`/goals/${goal.goal_id}`) View details →
+
+  else
+    .goals-empty
+      button.goals-empty-btn(type="button" onclick="openCreateGoalModal()")
+        | +
+      p.goals-empty-text Start Saving

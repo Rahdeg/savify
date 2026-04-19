@@ -1,39 +1,93 @@
 extends layout
 
 block content
-  h1  Welcome #{profile.full_name}!
+  - const totalSavings  = goals.reduce((sum, g) => sum + (parseFloat(g.current_amount) || 0), 0)
+  - const totalTarget   = goals.reduce((sum, g) => sum + (parseFloat(g.target_amount)  || 0), 0)
+  - const monthlySaved  = goals.filter(g => g.saving_frequency === 'monthly').reduce((sum, g) => sum + (parseFloat(g.current_amount) || 0), 0)
+  - const arcR          = 38
+  - const arcLen        = Math.PI * arcR
 
-  - const totalSavings = goals.reduce((sum, g) => sum + (parseFloat(g.current_amount) || 0), 0)
-  h3 Total Savings: £#{totalSavings.toFixed(2)}
-  h3 Total Goals: #{goals.length}
-  - console.log(goals)
-  if goals && goals.length
-    each goal in goals
-      h2 #{goal.goal_title}
-      p Overview
+  .dashboard-wrap
 
-      div(class="my-2 nav-link")
-        a(href="/goals") View goals
-  else
-    p No goals found.
+    //- ── Welcome row ──────────────────────────────────────────────────────
+    .dash-topbar
+      div
+        h1.dash-welcome Welcome #{profile.full_name}
+      button.btn-primary(type="button" onclick="openCreateGoalModal()") + Create Goal
 
-  h3 Recent Activity
-  - console.log(activities)
-  if activities 
-    table
-      thead
-        tr
-          th Activity
-          th Message
+    //- ── Stat cards ───────────────────────────────────────────────────────
+    .dash-stats
+      .stat-card
+        p.stat-label Total Savings
+        p.stat-value £#{totalSavings.toFixed(2)}
+      .stat-card
+        p.stat-label Total Goals
+        p.stat-value #{goals.length}
+      .stat-card
+        p.stat-label Total Monthly Saved
+        p.stat-value £#{monthlySaved.toFixed(2)}
 
-      tbody
-        each activity in activities
-          tr
-            td #{activity.activity_type}
-            td #{activity.activity_message}
+    //- ── Goals section ────────────────────────────────────────────────────
+    .dash-section
+      .dash-section-header
+        h2.dash-section-title Goals
+        .dash-section-tabs
+          span.tab-active Overview
+          a.tab-link(href="/goals") View All
 
-          tr
-            td #{activity.activity_id}
-            td #{formatDateTime(activity.created_at)}
-  else
-    p No recent activity founds.
+      if goals && goals.length
+        .goals-grid
+          each goal in goals
+            - const pct    = goal.progressPercent
+            - const filled = (pct / 100) * arcLen
+
+            article.goal-card
+              h3.goal-card-title #{goal.goal_title}
+              .goal-card-amounts
+                span.goal-amount £#{parseFloat(goal.current_amount).toFixed(2)}
+                span.goal-target Target: £#{parseFloat(goal.target_amount).toFixed(2)}
+
+              //- Thick dark arc gauge
+              .arc-wrap
+                svg(viewBox="0 0 100 58" width="140" height="82")
+                  //- Background track
+                  path(
+                    d="M 12,54 A 38,38 0 0,1 88,54"
+                    fill="none"
+                    stroke="#e2e8f0"
+                    stroke-width="12"
+                    stroke-linecap="round"
+                  )
+                  //- Progress (dark charcoal) — only draw when pct > 0
+                  if pct > 0
+                    path(
+                      d="M 12,54 A 38,38 0 0,1 88,54"
+                      fill="none"
+                      stroke="#1e293b"
+                      stroke-width="12"
+                      stroke-linecap="round"
+                      stroke-dasharray=`${filled} ${arcLen}`
+                    )
+                p.arc-pct #{pct}%
+
+      else
+        .goals-empty
+          button.goals-empty-btn(type="button" onclick="openCreateGoalModal()")
+            span.goals-empty-plus +
+          p.goals-empty-text Start Saving
+
+    //- ── Recent Activity ──────────────────────────────────────────────────
+    .dash-section
+      .dash-section-header
+        h2.dash-section-title Recent Activity
+        a.tab-link(href="/transactions") View All
+
+      if activities && activities.length
+        .activity-list
+          each activity in activities
+            .activity-row
+              span.activity-type #{activity.activity_type}
+              span.activity-msg #{activity.activity_message}
+              span.activity-date #{formatDateTime(activity.created_at)}
+      else
+        p.empty-msg No recent activity.
