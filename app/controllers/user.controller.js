@@ -52,3 +52,29 @@ exports.showTransactions = async (req, res) => {
     return res.status(500).send(err.message);
   }
 };
+
+exports.showContributions = async (req, res) => {
+  try {
+    const userId = req.session?.user?.user_id;
+    if (!userId) return res.redirect("/auth/login");
+
+    const user = new User(userId);
+    await user.getProfile();
+    await user.getContributions();
+
+    // Compute summary stats for the page header
+    const totalContributed = user.contributions.reduce(
+      (sum, c) => sum + (parseFloat(c.amount) || 0),
+      0
+    );
+
+    res.render("contributions", {
+      title: "My Contributions",
+      profile: user.profile,
+      contributions: user.contributions,
+      totalContributed,
+    });
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+};

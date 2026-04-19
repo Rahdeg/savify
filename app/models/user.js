@@ -10,9 +10,11 @@ class User {
   activities = [];
   goals = [];
   transactions = [];
+  contributions = [];
   hasLoadedActivities = false;
   hasLoadedGoals = false;
   hasLoadedTransactions = false;
+  hasLoadedContributions = false;
 
   constructor(userIdentifier) {
     const parsedId = Number(userIdentifier);
@@ -191,6 +193,35 @@ class User {
     this.transactions = await db.query(sql, [this.user_id]);
     this.hasLoadedTransactions = true;
     return this.transactions;
+  }
+
+  async getContributions() {
+    if (this.hasLoadedContributions) return this.contributions;
+
+    const sql = `
+      SELECT
+        t.transaction_id,
+        t.amount,
+        t.transaction_reference,
+        t.transaction_status,
+        t.transaction_date,
+        g.goal_id,
+        g.goal_title,
+        gc.category_name,
+        pm.method_name,
+        pm.provider_name
+      FROM transactions t
+      JOIN savings_goal g ON t.goal_id = g.goal_id
+      JOIN goal_category gc ON g.category_id = gc.category_id
+      LEFT JOIN payment_method pm ON t.payment_method_id = pm.payment_method_id
+      WHERE g.user_id = ?
+        AND t.transaction_type = 'deposit'
+      ORDER BY t.transaction_date DESC, t.transaction_id DESC
+    `;
+
+    this.contributions = await db.query(sql, [this.user_id]);
+    this.hasLoadedContributions = true;
+    return this.contributions;
   }
 }
 

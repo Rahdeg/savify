@@ -5,6 +5,7 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title #{title}
     link(rel="stylesheet", href="/css/style.css")
+    script(src="https://cdn.tailwindcss.com")
 
   body
     if sessionUser
@@ -16,6 +17,7 @@ html(lang="en")
           nav.sidebar-nav
             a.sidebar-link(href="/dashboard") Dashboard
             a.sidebar-link(href="/goals") Goals
+            a.sidebar-link(href="/contributions") Savings
             a.sidebar-link(href="/transactions") Transactions
           .sidebar-footer
             a.sidebar-link.sidebar-link--danger(href="/auth/logout") Log out
