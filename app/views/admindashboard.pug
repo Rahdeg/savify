@@ -1,44 +1,58 @@
-extends layout
+extends admin-layout
 
 block content
-  section(class="space-y-6")
-    h1(class="text-xl font-semibold") Admin Dashboard
 
-    //- Summary stat cards
-    .grid(class="grid-cols-2 sm:grid-cols-4 gap-4")
-      .card.text-center
-        p(class="text-slate-500 text-sm mb-1") Total Savings
-        p(class="text-2xl font-bold") £#{stats.total_savings}
-      .card.text-center
-        p(class="text-slate-500 text-sm mb-1") Total Users
-        p(class="text-2xl font-bold") #{stats.total_users}
-      .card.text-center
-        p(class="text-slate-500 text-sm mb-1") Total Goals
-        p(class="text-2xl font-bold") #{stats.total_goals}
-      .card.text-center
-        p(class="text-slate-500 text-sm mb-1") Total Withdrawals
-        p(class="text-2xl font-bold") #{stats.total_withdrawals}
+  //- ── Page header ─────────────────────────────────────────────────────────
+  .admin-topbar
+    div
+      h1.admin-page-title 📊 Admin Dashboard
+      p.admin-page-subtitle Platform overview — all users, goals and savings
 
-    //- Goal status breakdown
-    h2(class="text-lg font-semibold") Goals Breakdown
-    .grid(class="grid-cols-2 sm:grid-cols-4 gap-4")
-      .card.text-center
-        p(class="text-slate-500 text-sm mb-1") Active
-        p(class="text-2xl font-bold text-green-600") #{goalBreakdown.active_goals || 0}
-      .card.text-center
-        p(class="text-slate-500 text-sm mb-1") Completed
-        p(class="text-2xl font-bold text-blue-600") #{goalBreakdown.completed_goals || 0}
-      .card.text-center
-        p(class="text-slate-500 text-sm mb-1") Withdrawn
-        p(class="text-2xl font-bold text-yellow-600") #{goalBreakdown.withdrawn_goals || 0}
-      .card.text-center
-        p(class="text-slate-500 text-sm mb-1") Cancelled
-        p(class="text-2xl font-bold text-red-600") #{goalBreakdown.cancelled_goals || 0}
+  //- ── Summary stat cards ──────────────────────────────────────────────────
+  .admin-stats
+    .admin-stat-card
+      span.admin-stat-icon 💷
+      p.admin-stat-label Total Savings
+      p.admin-stat-value £#{stats.total_savings}
+    .admin-stat-card
+      span.admin-stat-icon 👤
+      p.admin-stat-label Total Users
+      p.admin-stat-value #{stats.total_users}
+    .admin-stat-card
+      span.admin-stat-icon 🎯
+      p.admin-stat-label Total Goals
+      p.admin-stat-value #{stats.total_goals}
+    .admin-stat-card
+      span.admin-stat-icon 💸
+      p.admin-stat-label Total Withdrawals
+      p.admin-stat-value #{stats.total_withdrawals}
 
-    //- Monthly contributions
-    h2(class="text-lg font-semibold") Monthly Contributions
+  //- ── Goals breakdown ─────────────────────────────────────────────────────
+  .admin-section
+    .admin-section-header
+      h2.admin-section-title 🎯 Goals Breakdown
+    .admin-section-body
+      .admin-breakdown
+        .admin-breakdown-item
+          span.admin-breakdown-num #{goalBreakdown.active_goals || 0}
+          span.admin-breakdown-label Active
+        .admin-breakdown-item
+          span.admin-breakdown-num #{goalBreakdown.completed_goals || 0}
+          span.admin-breakdown-label Completed
+        .admin-breakdown-item
+          span.admin-breakdown-num #{goalBreakdown.withdrawn_goals || 0}
+          span.admin-breakdown-label Withdrawn
+        .admin-breakdown-item
+          span.admin-breakdown-num #{goalBreakdown.cancelled_goals || 0}
+          span.admin-breakdown-label Cancelled
+
+  //- ── Monthly contributions ───────────────────────────────────────────────
+  .admin-section
+    .admin-section-header
+      h2.admin-section-title 📅 Monthly Contributions
+
     if monthlyContributions && monthlyContributions.length
-      .table-wrap
+      .table-wrap(style="border:none;border-radius:0;box-shadow:none;")
         table.app-table
           thead
             tr
@@ -47,15 +61,19 @@ block content
           tbody
             each row in monthlyContributions
               tr
-                td #{row.month}
-                td £#{row.total}
+                td(style="font-weight:500;") #{row.month}
+                td(style="font-weight:700;") £#{row.total}
     else
-      p No contribution data yet.
+      .admin-section-body
+        p(style="color:#94a3b8;font-size:0.875rem;text-align:center;padding:1rem 0;") No contribution data yet.
 
-    //- Users table
-    h2(class="text-lg font-semibold") Users
+  //- ── Users table ─────────────────────────────────────────────────────────
+  .admin-section
+    .admin-section-header
+      h2.admin-section-title 👤 Users
+
     if users && users.length
-      .table-wrap
+      .table-wrap(style="border:none;border-radius:0;box-shadow:none;")
         table.app-table
           thead
             tr
@@ -67,10 +85,13 @@ block content
           tbody
             each user in users
               tr
-                td #{user.full_name}
-                td #{user.email}
-                td #{user.active_goals}
-                td #{user.inactive_goals}
-                td #{user.total_goals}
+                td(style="font-weight:600;") #{user.full_name}
+                td(style="color:#6b7280;") #{user.email}
+                td
+                  span.badge.badge-green #{user.active_goals}
+                td
+                  span.badge.badge-grey #{user.inactive_goals}
+                td(style="font-weight:600;") #{user.total_goals}
     else
-      p No users registered yet.
+      .admin-section-body
+        p(style="color:#94a3b8;font-size:0.875rem;text-align:center;padding:1rem 0;") No users registered yet.

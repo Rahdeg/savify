@@ -1,38 +1,67 @@
 extends layout
 
 block content
-  section(class='space-y-4 max-w-lg mx-auto')
-    h1(class='text-xl font-semibold') Add Saving: #{goal.goal_title}
+  .page-header
+    div
+      h1.page-title Add Saving
+      p.page-subtitle Contributing to: #{goal.goal_title}
+    a.btn.btn-secondary(href=`/goals/${goal.goal_id}`) ← Back to Goal
 
-    .card
-      p #[span.label Target:] £#{goal.target_amount}
-      p #[span.label Saved so far:] £#{goal.current_amount}
-      p #[span.label Remaining:] £#{(goal.target_amount - goal.current_amount).toFixed(2)}
+  .form-page-wrap
 
-    if session.errorMessage
-      .alert.alert-danger= session.errorMessage
-      - delete session.errorMessage
+    //- Progress summary card
+    .form-card(style="margin-bottom:1.25rem;")
+      .form-card-header
+        p.form-card-title 💷 #{goal.goal_title} — Progress
+      .form-card-body(style="padding:1.25rem 1.5rem;")
+        - const remaining = parseFloat(goal.target_amount) - parseFloat(goal.current_amount)
+        - const pct = Math.min(Math.round((parseFloat(goal.current_amount) / parseFloat(goal.target_amount)) * 100), 100)
+        .form-summary
+          .form-summary-row
+            span Target
+            strong £#{parseFloat(goal.target_amount).toFixed(2)}
+          .form-summary-row
+            span Saved so far
+            strong £#{parseFloat(goal.current_amount).toFixed(2)}
+          .form-summary-row
+            span Remaining
+            strong £#{remaining.toFixed(2)}
+        .progress-label(style="display:flex;justify-content:space-between;font-size:0.78rem;color:#6b7280;margin-bottom:0.4rem;font-weight:500;")
+          span Progress
+          span #{pct}%
+        .progress-bar
+          .progress-fill(style=`width:${pct}%`)
 
-    form(action=`/goals/${goal.goal_id}/contribute` method="POST" class="space-y-4")
+    //- Contribution form
+    .form-card
+      .form-card-header
+        p.form-card-title Make a Saving
 
-      div
-        label.block.text-sm.font-medium.mb-1(for="amount") Saving amount (£)
-        input#amount.w-full.border.rounded.p-2(
-          type="number"
-          name="amount"
-          min="0.01"
-          step="0.01"
-          placeholder="0.00"
-          required
-        )
+      .form-card-body
 
-      div
-        label.block.text-sm.font-medium.mb-1(for="payment_method_id") Payment method
-        select#payment_method_id.w-full.border.rounded.p-2(name="payment_method_id" required)
-          option(value="") Select a payment method
-          each pm in paymentMethods
-            option(value=pm.payment_method_id) #{pm.method_name} — #{pm.provider_name}
+        if session && session.errorMessage
+          .alert-danger #{session.errorMessage}
 
-      div(class='flex gap-3')
-        button(type="submit" class="btn btn-dark") Confirm Saving
-        a(href=`/goals/${goal.goal_id}` class='btn btn-secondary') Cancel
+        form(action=`/goals/${goal.goal_id}/contribute` method="POST")
+
+          .form-group
+            label.form-label(for="amount") Saving Amount (£)
+            input.form-control#amount(
+              type="number"
+              name="amount"
+              min="0.01"
+              step="0.01"
+              placeholder="0.00"
+              required
+            )
+
+          .form-group
+            label.form-label(for="payment_method_id") Payment Method
+            select.form-control#payment_method_id(name="payment_method_id" required)
+              option(value="") Select a payment method
+              each pm in paymentMethods
+                option(value=pm.payment_method_id) #{pm.method_name} — #{pm.provider_name}
+
+          .form-actions
+            button.btn.btn-primary(type="submit") ✓ Confirm Saving
+            a.btn.btn-secondary(href=`/goals/${goal.goal_id}`) Cancel

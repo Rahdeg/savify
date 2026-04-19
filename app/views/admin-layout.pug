@@ -1,0 +1,78 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title #{title} — Savify Admin
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin="")
+    link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap")
+    link(rel="stylesheet", href="/css/style.css")
+    link(rel="stylesheet", href="/css/admin.css")
+
+  body.admin-body
+
+    //- ── Mobile topbar ──────────────────────────────────────────────────────
+    header.admin-mobile-topbar
+      button.admin-hamburger#adminHamburger(type="button" aria-label="Open menu")
+        span
+        span
+        span
+      span.admin-mobile-brand ⚙ Admin
+      span(style="width:2.5rem;")
+
+    //- ── Overlay ────────────────────────────────────────────────────────────
+    .admin-overlay#adminOverlay
+
+    //- ── Page shell ─────────────────────────────────────────────────────────
+    .admin-shell
+
+      aside.admin-sidebar#adminSidebar
+
+        //- Brand
+        .admin-sidebar-brand
+          .admin-brand-icon ⚙
+          div
+            span.admin-brand-title Savify
+            span.admin-brand-badge Admin
+
+        //- Nav
+        nav.admin-sidebar-nav
+          a.admin-sidebar-link(href="/admin/dashboard")
+            span.admin-sidebar-icon 📊
+            | Dashboard
+
+        //- Footer
+        .admin-sidebar-footer
+          .admin-sidebar-meta
+            span.admin-sidebar-icon 🔒
+            | Admin Panel
+          a.admin-sidebar-link.admin-link-danger(href="/auth/logout")
+            span.admin-sidebar-icon ⬅
+            | Sign Out
+
+      //- ── Main content ───────────────────────────────────────────────────
+      .admin-content
+        main
+          block content
+
+    script.
+      (function () {
+        const hamburger = document.getElementById('adminHamburger');
+        const sidebar   = document.getElementById('adminSidebar');
+        const overlay   = document.getElementById('adminOverlay');
+
+        function open() {
+          sidebar.classList.add('admin-sidebar--open');
+          overlay.classList.add('admin-overlay--visible');
+          document.body.style.overflow = 'hidden';
+        }
+        function close() {
+          sidebar.classList.remove('admin-sidebar--open');
+          overlay.classList.remove('admin-overlay--visible');
+          document.body.style.overflow = '';
+        }
+
+        hamburger.addEventListener('click', open);
+        overlay.addEventListener('click', close);
+      })();

@@ -9,85 +9,94 @@ block content
 
   .dashboard-wrap
 
-    //- ── Welcome row ──────────────────────────────────────────────────────
+    //- ── Welcome banner ──────────────────────────────────────────────────────
     .dash-topbar
       div
-        h1.dash-welcome Welcome #{profile.full_name}
-      button.btn-primary(type="button" onclick="openCreateGoalModal()") + Create Goal
+        h1.dash-welcome Welcome back, #{profile.full_name.split(' ')[0]} 👋
+        p.dash-welcome-sub Here's an overview of your savings progress
+      button.btn-primary(type="button" onclick="openCreateGoalModal()")
+        | + New Goal
 
-    //- ── Stat cards ───────────────────────────────────────────────────────
+    //- ── Stat cards ──────────────────────────────────────────────────────────
     .dash-stats
       .stat-card
+        span.stat-icon 💷
         p.stat-label Total Savings
         p.stat-value £#{totalSavings.toFixed(2)}
       .stat-card
-        p.stat-label Total Goals
+        span.stat-icon 🎯
+        p.stat-label Active Goals
         p.stat-value #{goals.length}
       .stat-card
-        p.stat-label Total Monthly Saved
+        span.stat-icon 📅
+        p.stat-label Monthly Saved
         p.stat-value £#{monthlySaved.toFixed(2)}
 
-    //- ── Goals section ────────────────────────────────────────────────────
+    //- ── Goals section ───────────────────────────────────────────────────────
     .dash-section
       .dash-section-header
-        h2.dash-section-title Goals
+        h2.dash-section-title My Goals
         .dash-section-tabs
           span.tab-active Overview
-          a.tab-link(href="/goals") View All
+          a.tab-link(href="/goals") View All →
 
       if goals && goals.length
         .goals-grid
           each goal in goals
             - const pct    = goal.progressPercent
             - const filled = (pct / 100) * arcLen
+            - const isDone = goal.goal_status === 'completed'
 
             article.goal-card
               h3.goal-card-title #{goal.goal_title}
               .goal-card-amounts
                 span.goal-amount £#{parseFloat(goal.current_amount).toFixed(2)}
-                span.goal-target Target: £#{parseFloat(goal.target_amount).toFixed(2)}
+                span.goal-target of £#{parseFloat(goal.target_amount).toFixed(2)}
 
-              //- Thick dark arc gauge
+              //- Arc progress gauge
               .arc-wrap
                 svg(viewBox="0 0 100 58" width="140" height="82")
-                  //- Background track
                   path(
                     d="M 12,54 A 38,38 0 0,1 88,54"
                     fill="none"
-                    stroke="#e2e8f0"
-                    stroke-width="12"
+                    stroke="#e5e7eb"
+                    stroke-width="10"
                     stroke-linecap="round"
                   )
-                  //- Progress (dark charcoal) — only draw when pct > 0
                   if pct > 0
                     path(
                       d="M 12,54 A 38,38 0 0,1 88,54"
                       fill="none"
-                      stroke="#1e293b"
-                      stroke-width="12"
+                      stroke="url(#gaugeGrad)"
+                      stroke-width="10"
                       stroke-linecap="round"
                       stroke-dasharray=`${filled} ${arcLen}`
                     )
+                  defs
+                    linearGradient(id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%")
+                      stop(offset="0%" stop-color="#6366f1")
+                      stop(offset="100%" stop-color="#8b5cf6")
                 p.arc-pct #{pct}%
 
       else
         .goals-empty
-          button.goals-empty-btn(type="button" onclick="openCreateGoalModal()")
-            span.goals-empty-plus +
-          p.goals-empty-text Start Saving
+          button.goals-empty-btn(type="button" onclick="openCreateGoalModal()") +
+          p.goals-empty-text No goals yet — start saving!
+          button.btn-primary(type="button" onclick="openCreateGoalModal()") Create your first goal
 
-    //- ── Recent Activity ──────────────────────────────────────────────────
+    //- ── Recent Activity ─────────────────────────────────────────────────────
     .dash-section
       .dash-section-header
         h2.dash-section-title Recent Activity
-        a.tab-link(href="/transactions") View All
+        a.tab-link(href="/transactions") View All →
 
       if activities && activities.length
         .activity-list
           each activity in activities
             .activity-row
+              span.activity-dot
               span.activity-type #{activity.activity_type}
               span.activity-msg #{activity.activity_message}
               span.activity-date #{formatDateTime(activity.created_at)}
       else
-        p.empty-msg No recent activity.
+        p.empty-msg No recent activity yet. Make a saving to get started!

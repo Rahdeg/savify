@@ -3,24 +3,50 @@ html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title #{title}
+    title #{title} — Savify
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin="")
+    link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap")
     link(rel="stylesheet", href="/css/style.css")
     script(src="https://cdn.tailwindcss.com")
 
   body
     if sessionUser
-      //- ── Sidebar + content ────────────────────────────────────────────
+
+      //- ── Mobile topbar ────────────────────────────────────────────────────
+      header.mobile-topbar
+        button.hamburger#hamburger(type="button" aria-label="Open menu")
+          span
+          span
+          span
+        span.mobile-brand Sav#[span ify]
+        span(style="width:2.5rem;")
+
+      //- ── Overlay ──────────────────────────────────────────────────────────
+      .sidebar-overlay#sidebarOverlay
+
+      //- ── Sidebar + content ────────────────────────────────────────────────
       .page-shell
 
-        aside.sidebar
+        aside.sidebar#sidebar
           .sidebar-brand Sav#[span ify]
           nav.sidebar-nav
-            a.sidebar-link(href="/dashboard") Dashboard
-            a.sidebar-link(href="/goals") Goals
-            a.sidebar-link(href="/contributions") Savings
-            a.sidebar-link(href="/transactions") Transactions
+            a.sidebar-link(href="/dashboard")
+              span.sidebar-icon 🏠
+              | Dashboard
+            a.sidebar-link(href="/goals")
+              span.sidebar-icon 🎯
+              | Goals
+            a.sidebar-link(href="/contributions")
+              span.sidebar-icon 💰
+              | Savings
+            a.sidebar-link(href="/transactions")
+              span.sidebar-icon 📋
+              | Transactions
           .sidebar-footer
-            a.sidebar-link.sidebar-link--danger(href="/auth/logout") Log out
+            a.sidebar-link.sidebar-link--danger(href="/auth/logout")
+              span.sidebar-icon ⬅
+              | Log out
 
         .page-content
           main
@@ -28,15 +54,48 @@ html(lang="en")
             include create-savings-goal
 
     else
-      //- ── Guest header ─────────────────────────────────────────────────
-      header(style="background:#fff;border-bottom:1px solid #e2e8f0;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;")
-        span(style="font-size:1.2rem;font-weight:800;color:#0f172a;") Sav#[span(style="color:#4f46e5") ify]
+      //- ── Guest header ─────────────────────────────────────────────────────
+      header(style="background:#fff;border-bottom:1px solid #e5e7eb;padding:1rem 1.75rem;display:flex;align-items:center;justify-content:space-between;")
+        span(style="font-size:1.2rem;font-weight:800;color:#0f172a;font-family:'Inter',sans-serif;letter-spacing:-0.02em;") Sav#[span(style="color:#6366f1") ify]
         nav(style="display:flex;gap:0.5rem;")
-          a.nav-link(href="/auth/login") Login
-          a.nav-link(href="/auth/register") Register
+          a.nav-link(href="/auth/login") Sign in
+          a.nav-link(href="/auth/register" style="background:#6366f1;color:#fff;border-color:#6366f1;") Get started
 
-      main(style="max-width:900px;margin:0 auto;padding:1.5rem;")
+      main(style="max-width:960px;margin:0 auto;padding:2rem 1.75rem;")
         block content
         include create-savings-goal
 
     script(src="/js/modal.js")
+    script.
+      // Mark active sidebar link
+      (function () {
+        var path = window.location.pathname;
+        document.querySelectorAll('.sidebar-link').forEach(function (link) {
+          if (link.getAttribute('href') === path) link.classList.add('active');
+        });
+
+        // Mobile sidebar toggle
+        var hamburger = document.getElementById('hamburger');
+        var sidebar   = document.getElementById('sidebar');
+        var overlay   = document.getElementById('sidebarOverlay');
+        if (!hamburger) return;
+
+        function openSidebar() {
+          sidebar.classList.add('sidebar--open');
+          overlay.classList.add('sidebar-overlay--visible');
+          document.body.style.overflow = 'hidden';
+        }
+        function closeSidebar() {
+          sidebar.classList.remove('sidebar--open');
+          overlay.classList.remove('sidebar-overlay--visible');
+          document.body.style.overflow = '';
+        }
+
+        hamburger.addEventListener('click', openSidebar);
+        overlay.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a link is tapped on mobile
+        document.querySelectorAll('.sidebar-link').forEach(function (link) {
+          link.addEventListener('click', closeSidebar);
+        });
+      })();
