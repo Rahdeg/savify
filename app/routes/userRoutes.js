@@ -5,6 +5,7 @@ const { requireAuth } = require("../middleware/auth");
 
 router.get("/dashboard", requireAuth, userController.showDashboard);
 router.get("/transactions", requireAuth, userController.showTransactions);
+router.get("/contributions", requireAuth, userController.showContributions);
 
 
 module.exports = router;

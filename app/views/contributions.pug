@@ -1,0 +1,62 @@
+extends layout
+
+block content
+  - const count = contributions ? contributions.length : 0
+
+  .page-header
+    div
+      h1.page-title Savings
+      p.page-subtitle A full history of all your savings across every goal.
+
+  //- ── Summary stat cards ────────────────────────────────────────────────
+  .dash-stats(style="margin-bottom:1.5rem;")
+    .stat-card
+      p.stat-label Total Saved
+      p.stat-value £#{totalContributed.toFixed(2)}
+    .stat-card
+      p.stat-label Number of Savings
+      p.stat-value #{count}
+    .stat-card
+      p.stat-label Average Saving
+      p.stat-value
+        if count > 0
+          | £#{(totalContributed / count).toFixed(2)}
+        else
+          | —
+
+  //- ── Contributions table ───────────────────────────────────────────────
+  if contributions && contributions.length
+    .table-wrap
+      table.app-table
+        thead
+          tr
+            th Date
+            th Goal
+            th Category
+            th Amount
+            th Payment Method
+            th Reference
+            th Status
+        tbody
+          each c in contributions
+            tr
+              td #{formatDateTime(c.transaction_date)}
+              td
+                a.link-text(href='/goals/' + c.goal_id) #{c.goal_title}
+              td #{c.category_name}
+              td £#{parseFloat(c.amount).toFixed(2)}
+              td
+                if c.method_name
+                  | #{c.method_name}
+                  if c.provider_name
+                    |  — #{c.provider_name}
+                else
+                  | —
+              td.mono #{c.transaction_reference || '—'}
+              td
+                - const badgeCls = c.transaction_status === 'completed' ? 'badge-green' : c.transaction_status === 'pending' ? 'badge-grey' : 'badge-grey'
+                span(class=`badge ${badgeCls}`) #{c.transaction_status}
+  else
+    .dash-section(style="text-align:center;padding:2.5rem 1rem;")
+      p.empty-msg No savings yet. Start saving towards a goal!
+      a.btn-primary(href="/goals" style="display:inline-block;margin-top:0.75rem;") View Goals
