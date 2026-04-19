@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  section(class='max-w-sm mx-auto mt-16 space-y-4')
+    h1(class='text-xl font-semibold text-center') Admin Verification
+
+    p(class='text-slate-500 text-sm text-center') Enter the admin secret to continue.
+
+    if error
+      .alert.alert-danger= error
+
+    form(action="/admin/verify" method="POST" class="space-y-4")
+      div
+        label.block.text-sm.font-medium.mb-1(for="secret") Admin password
+        input#secret.w-full.border.rounded.p-2(
+          type="password"
+          name="secret"
+          required
+          autofocus
+        )
+
+      button(type="submit" class="btn btn-dark w-full") Continue

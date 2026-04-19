@@ -1,0 +1,38 @@
+extends layout
+
+block content
+  section(class='space-y-4 max-w-lg mx-auto')
+    h1(class='text-xl font-semibold') Add Contribution: #{goal.goal_title}
+
+    .card
+      p #[span.label Target:] £#{goal.target_amount}
+      p #[span.label Saved so far:] £#{goal.current_amount}
+      p #[span.label Remaining:] £#{(goal.target_amount - goal.current_amount).toFixed(2)}
+
+    if session.errorMessage
+      .alert.alert-danger= session.errorMessage
+      - delete session.errorMessage
+
+    form(action=`/goals/${goal.goal_id}/contribute` method="POST" class="space-y-4")
+
+      div
+        label.block.text-sm.font-medium.mb-1(for="amount") Contribution amount (£)
+        input#amount.w-full.border.rounded.p-2(
+          type="number"
+          name="amount"
+          min="0.01"
+          step="0.01"
+          placeholder="0.00"
+          required
+        )
+
+      div
+        label.block.text-sm.font-medium.mb-1(for="payment_method_id") Payment method
+        select#payment_method_id.w-full.border.rounded.p-2(name="payment_method_id" required)
+          option(value="") Select a payment method
+          each pm in paymentMethods
+            option(value=pm.payment_method_id) #{pm.method_name} — #{pm.provider_name}
+
+      div(class='flex gap-3')
+        button(type="submit" class="btn btn-dark") Confirm Contribution
+        a(href=`/goals/${goal.goal_id}` class='btn btn-secondary') Cancel
