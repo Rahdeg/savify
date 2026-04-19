@@ -174,7 +174,7 @@ CREATE TABLE `savings_goal` (
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
   `scheduled_withdrawal_date` date DEFAULT NULL,
-  `goal_status` enum('active','completed','cancelled') COLLATE utf8mb4_general_ci DEFAULT 'active',
+  `goal_status` enum('active','completed','cancelled','withdrawn') COLLATE utf8mb4_general_ci DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `category_id` int DEFAULT NULL,
   `user_id` int DEFAULT NULL,
@@ -283,6 +283,23 @@ INSERT INTO `users` (`user_id`, `full_name`, `email`, `occupation`, `password_ha
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `user_account`
+--
+
+CREATE TABLE `user_account` (
+  `account_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `account_name` varchar(120) COLLATE utf8mb4_general_ci NOT NULL,
+  `bank_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `account_number` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `sort_code` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
+  `account_type` enum('current','savings','isa') COLLATE utf8mb4_general_ci DEFAULT 'current',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `withdrawal`
 --
 
@@ -295,7 +312,8 @@ CREATE TABLE `withdrawal` (
   `withdrawal_status` enum('pending','approved','rejected') COLLATE utf8mb4_general_ci DEFAULT NULL,
   `requested_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `processed_at` timestamp NULL DEFAULT NULL,
-  `goal_id` int DEFAULT NULL
+  `goal_id` int DEFAULT NULL,
+  `user_account_id` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -369,6 +387,13 @@ ALTER TABLE `transactions`
   ADD KEY `fk_payment_method` (`payment_method_id`);
 
 --
+-- Indexes for table `user_account`
+--
+ALTER TABLE `user_account`
+  ADD PRIMARY KEY (`account_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -435,6 +460,12 @@ ALTER TABLE `transactions`
   MODIFY `transaction_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT for table `user_account`
+--
+ALTER TABLE `user_account`
+  MODIFY `account_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -489,10 +520,17 @@ ALTER TABLE `transactions`
   ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`goal_id`) REFERENCES `savings_goal` (`goal_id`);
 
 --
+-- Constraints for table `user_account`
+--
+ALTER TABLE `user_account`
+  ADD CONSTRAINT `user_account_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+
+--
 -- Constraints for table `withdrawal`
 --
 ALTER TABLE `withdrawal`
-  ADD CONSTRAINT `withdrawal_ibfk_1` FOREIGN KEY (`goal_id`) REFERENCES `savings_goal` (`goal_id`);
+  ADD CONSTRAINT `withdrawal_ibfk_1` FOREIGN KEY (`goal_id`) REFERENCES `savings_goal` (`goal_id`),
+  ADD CONSTRAINT `withdrawal_ibfk_2` FOREIGN KEY (`user_account_id`) REFERENCES `user_account` (`account_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

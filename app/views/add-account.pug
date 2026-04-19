@@ -1,0 +1,60 @@
+extends layout
+
+block content
+  section(class='space-y-4 max-w-lg mx-auto')
+    h1(class='text-xl font-semibold') Add Payout Account
+
+    if session.errorMessage
+      .alert.alert-danger= session.errorMessage
+      - delete session.errorMessage
+
+    form(action="/accounts/add" method="POST" class="space-y-4")
+
+      div
+        label.block.text-sm.font-medium.mb-1(for="account_name") Account nickname
+        input#account_name.w-full.border.rounded.p-2(
+          type="text"
+          name="account_name"
+          placeholder="e.g. My HSBC Current Account"
+          required
+        )
+
+      div
+        label.block.text-sm.font-medium.mb-1(for="bank_name") Bank name
+        input#bank_name.w-full.border.rounded.p-2(
+          type="text"
+          name="bank_name"
+          placeholder="e.g. HSBC"
+          required
+        )
+
+      div
+        label.block.text-sm.font-medium.mb-1(for="account_number") Account number
+        input#account_number.w-full.border.rounded.p-2(
+          type="text"
+          name="account_number"
+          placeholder="8 digits"
+          maxlength="8"
+          required
+        )
+
+      div
+        label.block.text-sm.font-medium.mb-1(for="sort_code") Sort code
+        input#sort_code.w-full.border.rounded.p-2(
+          type="text"
+          name="sort_code"
+          placeholder="e.g. 04-00-04"
+          maxlength="8"
+          required
+        )
+
+      div
+        label.block.text-sm.font-medium.mb-1(for="account_type") Account type
+        select#account_type.w-full.border.rounded.p-2(name="account_type")
+          option(value="current") Current
+          option(value="savings") Savings
+          option(value="isa") ISA
+
+      div(class='flex gap-3')
+        button(type="submit" class="btn btn-dark") Save Account
+        a(href="/accounts" class='btn btn-secondary') Cancel

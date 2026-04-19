@@ -2,6 +2,7 @@ const db = require("../services/db");
 
 class Goal {
   goal_id;
+  user_id;
   goal_title;
   goal_description;
   category_name;
@@ -21,6 +22,7 @@ class Goal {
 
   static fromRow(row) {
     const goal = new Goal(row.goal_id);
+    goal.user_id = row.user_id;
     goal.goal_title = row.goal_title;
     goal.goal_description = row.goal_description;
     goal.category_name = row.category_name;
@@ -41,6 +43,7 @@ class Goal {
     const sql = `
       SELECT
         g.goal_id,
+        g.user_id,
         g.goal_title,
         g.goal_description,
         gc.category_name,
@@ -113,7 +116,8 @@ async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_da
     this.transactions = await db.query(sql, [this.goal_id]);
     return this.transactions;
   }
-  async withdraw(reasonForWithdrawal) {
+
+  async withdraw(reasonForWithdrawal, userAccountId) {
   // Step 1: Make sure goal details are loaded
   await this.getGoalDetails();
 
@@ -127,23 +131,23 @@ async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_da
 
   // Step 3: Update goal status to withdrawn and reset current amount
   await db.query(
-    `UPDATE savings_goal 
-     SET goal_status = 'withdrawn', current_amount = 0 
+    `UPDATE savings_goal
+     SET goal_status = 'withdrawn', current_amount = 0
      WHERE goal_id = ?`,
     [this.goal_id]
   );
 
-  // Step 4: Record in withdrawal table
+  // Step 4: Record in withdrawal table including the user's chosen payout account
   await db.query(
-    `INSERT INTO withdrawal 
-      (requested_amount, approved_amount, reason_for_withdrawal, eligibility_status, withdrawal_status, processed_at, goal_id)
-     VALUES (?, ?, ?, 'eligible', 'approved', NOW(), ?)`,
-    [amount, amount, reasonForWithdrawal || null, this.goal_id]
+    `INSERT INTO withdrawal
+      (requested_amount, approved_amount, reason_for_withdrawal, eligibility_status, withdrawal_status, processed_at, goal_id, user_account_id)
+     VALUES (?, ?, ?, 'eligible', 'approved', NOW(), ?, ?)`,
+    [amount, amount, reasonForWithdrawal || null, this.goal_id, userAccountId || null]
   );
 
   // Step 5: Record in transactions table
   await db.query(
-    `INSERT INTO transactions 
+    `INSERT INTO transactions
       (transaction_type, amount, transaction_reference, transaction_status, goal_id)
      VALUES ('withdrawal', ?, ?, 'completed', ?)`,
     [amount, reference, this.goal_id]
@@ -151,9 +155,9 @@ async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_da
 
   // Step 6: Log in activity_log
   await db.query(
-    `INSERT INTO activity_log (activity_type, activity_message)
-     VALUES ('Withdrawal', ?)`,
-    [`Withdrawal of ${amount} processed for goal ID ${this.goal_id}`]
+    `INSERT INTO activity_log (user_id, activity_type, activity_message)
+     VALUES (?, 'Withdrawal', ?)`,
+    [this.user_id, `Withdrawal of ${amount} processed for goal ID ${this.goal_id}`]
   );
 
   // Step 7: Update local state

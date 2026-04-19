@@ -6,6 +6,7 @@ const userRoutes = require("./routes/userRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/authRoutes");
+const accountRoutes = require("./routes/accountRoutes");
 const { formatDate, formatDateTime } = require("./utils/formatDate");
 const Category = require("./models/category");
 
@@ -57,6 +58,7 @@ app.use("/", userRoutes);
 app.use("/goals", goalRoutes);
 app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
+app.use("/accounts", accountRoutes);
 
 // Add static files location
 app.use(express.static("static"));
