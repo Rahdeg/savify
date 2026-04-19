@@ -113,7 +113,57 @@ async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_da
     this.transactions = await db.query(sql, [this.goal_id]);
     return this.transactions;
   }
+  async withdraw(reasonForWithdrawal) {
+  // Step 1: Make sure goal details are loaded
+  await this.getGoalDetails();
+
+  // Step 2: Check eligibility — must be completed
+  // if (this.goal_status !== 'completed') {
+  //   throw new Error('Goal is not eligible for withdrawal. It must be completed first.');
+  // } //   this will be uncommented later.
+
+  const amount = this.current_amount;
+  const reference = 'WDR' + Date.now();
+
+  // Step 3: Update goal status to withdrawn and reset current amount
+  await db.query(
+    `UPDATE savings_goal 
+     SET goal_status = 'withdrawn', current_amount = 0 
+     WHERE goal_id = ?`,
+    [this.goal_id]
+  );
+
+  // Step 4: Record in withdrawal table
+  await db.query(
+    `INSERT INTO withdrawal 
+      (requested_amount, approved_amount, reason_for_withdrawal, eligibility_status, withdrawal_status, processed_at, goal_id)
+     VALUES (?, ?, ?, 'eligible', 'approved', NOW(), ?)`,
+    [amount, amount, reasonForWithdrawal || null, this.goal_id]
+  );
+
+  // Step 5: Record in transactions table
+  await db.query(
+    `INSERT INTO transactions 
+      (transaction_type, amount, transaction_reference, transaction_status, goal_id)
+     VALUES ('withdrawal', ?, ?, 'completed', ?)`,
+    [amount, reference, this.goal_id]
+  );
+
+  // Step 6: Log in activity_log
+  await db.query(
+    `INSERT INTO activity_log (activity_type, activity_message)
+     VALUES ('Withdrawal', ?)`,
+    [`Withdrawal of ${amount} processed for goal ID ${this.goal_id}`]
+  );
+
+  // Step 7: Update local state
+  this.goal_status = 'withdrawn';
+  this.current_amount = 0;
+
+  return { amount, reference };
 }
+}
+
 
 module.exports = {
   Goal,

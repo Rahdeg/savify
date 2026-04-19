@@ -9,8 +9,5 @@ router.get("/categories", requireAuth, categoryController.showCategories);
 router.post("/create", requireAuth, goalController.createGoal);
 router.get("/:id", goalController.showGoalDetails);
 router.get("/:id/transactions", goalController.showTransactions);
-
-
-
-
+router.post("/:id/withdraw", goalController.withdrawGoal);
 module.exports = router;
