@@ -1,6 +1,7 @@
 const { Goal } = require("../models/goal");
 const { User } = require("../models/user");
 const { UserAccount } = require("../models/userAccount");
+const { PaymentMethod } = require("../models/paymentMethod");
 
 exports.listGoals = async (req, res) => {
   try {
@@ -132,6 +133,73 @@ exports.showTransactions = async (req, res) => {
     });
   } catch (err) {
     return res.status(500).send(err.message);
+  }
+};
+
+exports.showContributePage = async (req, res) => {
+  try {
+    const goalId = req.params.id;
+    const sessionUserId = req.session?.user?.user_id;
+
+    const goal = new Goal(goalId);
+    const goalDetails = await goal.getGoalDetails();
+
+    if (!goalDetails) return res.status(404).send("Goal not found");
+
+    if (goal.user_id !== sessionUserId) {
+      return res.redirect(`/goals/${goalId}`);
+    }
+
+    if (goal.goal_status !== "active") {
+      req.session.errorMessage = "Contributions can only be made to active goals.";
+      return res.redirect(`/goals/${goalId}`);
+    }
+
+    const paymentMethods = await PaymentMethod.getActive();
+
+    res.render("contribute-goal", {
+      title: "Add Contribution",
+      goal,
+      paymentMethods,
+      session: req.session,
+    });
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+};
+
+exports.addContribution = async (req, res) => {
+  try {
+    const goalId = req.params.id;
+    const { amount, payment_method_id } = req.body;
+    const sessionUserId = req.session?.user?.user_id;
+
+    const goal = new Goal(goalId);
+    const goalDetails = await goal.getGoalDetails();
+
+    if (!goalDetails) {
+      req.session.errorMessage = "Goal not found.";
+      return res.redirect("/goals");
+    }
+
+    if (goal.user_id !== sessionUserId) {
+      req.session.errorMessage = "You are not authorised to contribute to this goal.";
+      return res.redirect(`/goals/${goalId}`);
+    }
+
+    const result = await goal.contribute(amount, payment_method_id);
+
+    req.session.successMessage = result.completed
+      ? `£${result.amount} added — goal complete! Reference: ${result.reference}`
+      : `£${result.amount} added successfully. Reference: ${result.reference}`;
+
+    res.redirect(`/goals/${goalId}`);
+  } catch (err) {
+    console.error(err);
+    req.session.errorMessage = err.isUserFacing
+      ? err.message
+      : "Unable to process contribution, please try again later.";
+    res.redirect(`/goals/${req.params.id}`);
   }
 };
 

@@ -27,18 +27,25 @@ block content
           .alert.alert-danger= session.errorMessage
           - delete session.errorMessage
 
-        //- Withdraw button
-        if goal.goal_status === 'completed'
-          a.btn.btn-dark(href=`/goals/${goal.goal_id}/withdraw`) Withdraw
+        //- Action buttons
+        .flex.flex-col.gap-2.mt-3
 
-        else if goal.goal_status === 'withdrawn'
-          button(class="btn btn-dark" disabled) Already Withdrawn
+          //- Contribute — only for active goals
+          if goal.goal_status === 'active'
+            a.btn.btn-dark(href=`/goals/${goal.goal_id}/contribute`) Add Contribution
 
-        else if goal.goal_status === 'cancelled'
-          button(class="btn btn-dark" disabled) Goal Cancelled
+          //- Withdraw
+          if goal.goal_status === 'completed'
+            a.btn.btn-dark(href=`/goals/${goal.goal_id}/withdraw`) Withdraw
 
-        else
-          button(class="btn btn-dark" disabled) Withdraw (Goal Not Completed Yet)
+          else if goal.goal_status === 'withdrawn'
+            button(class="btn btn-dark" disabled) Already Withdrawn
+
+          else if goal.goal_status === 'cancelled'
+            button(class="btn btn-dark" disabled) Goal Cancelled
+
+          else if goal.goal_status !== 'active'
+            button(class="btn btn-dark" disabled) Withdraw (Goal Not Completed Yet)
 
       h3(class='text-lg font-semibold') Transactions
       if transactions && transactions.length

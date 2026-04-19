@@ -117,6 +117,58 @@ async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_da
     return this.transactions;
   }
 
+  async contribute(amount, paymentMethodId) {
+    // Step 1: Make sure goal details are loaded
+    await this.getGoalDetails();
+
+    // Step 2: Validate
+    const contribution = parseFloat(amount);
+    if (!contribution || contribution <= 0) {
+      const err = new Error("Contribution amount must be greater than zero.");
+      err.isUserFacing = true;
+      throw err;
+    }
+    if (this.goal_status !== "active") {
+      const err = new Error("Contributions can only be made to active goals.");
+      err.isUserFacing = true;
+      throw err;
+    }
+
+    const reference = "DEP" + Date.now();
+    const newTotal = parseFloat(this.current_amount) + contribution;
+    const reachedTarget = newTotal >= parseFloat(this.target_amount);
+    const newStatus = reachedTarget ? "completed" : "active";
+
+    // Step 3: Update current_amount (and status if target reached)
+    await db.query(
+      `UPDATE savings_goal
+       SET current_amount = ?, goal_status = ?
+       WHERE goal_id = ?`,
+      [newTotal, newStatus, this.goal_id]
+    );
+
+    // Step 4: Record transaction
+    await db.query(
+      `INSERT INTO transactions
+        (transaction_type, amount, transaction_reference, transaction_status, goal_id, payment_method_id)
+       VALUES ('deposit', ?, ?, 'completed', ?, ?)`,
+      [contribution, reference, this.goal_id, paymentMethodId || null]
+    );
+
+    // Step 5: Log activity
+    await db.query(
+      `INSERT INTO activity_log (user_id, activity_type, activity_message)
+       VALUES (?, 'Deposit', ?)`,
+      [this.user_id, `Contribution of £${contribution} added to goal "${this.goal_title}"`]
+    );
+
+    // Step 6: Update local state
+    this.current_amount = newTotal;
+    this.goal_status = newStatus;
+
+    return { amount: contribution, reference, newTotal, completed: reachedTarget };
+  }
+
   async withdraw(reasonForWithdrawal, userAccountId) {
   // Step 1: Make sure goal details are loaded
   await this.getGoalDetails();
