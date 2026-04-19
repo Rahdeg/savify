@@ -1,22 +1,37 @@
-extends layout
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Admin Verification — Savify
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap")
+    link(rel="stylesheet", href="/css/admin.css")
 
-block content
-  section(class='max-w-sm mx-auto mt-16 space-y-4')
-    h1(class='text-xl font-semibold text-center') Admin Verification
+  body(style="margin:0;")
+    .admin-verify-screen
+      .admin-verify-card
 
-    p(class='text-slate-500 text-sm text-center') Enter the admin secret to continue.
+        .admin-verify-logo
+          .admin-verify-icon ⚙
+          span(style="font-size:1.1rem;font-weight:800;color:#0f172a;font-family:'Inter',sans-serif;") Savify Admin
 
-    if error
-      .alert.alert-danger= error
+        h1.admin-verify-title Admin Access
+        p.admin-verify-subtitle Enter the admin password to continue to the dashboard.
 
-    form(action="/admin/verify" method="POST" class="space-y-4")
-      div
-        label.block.text-sm.font-medium.mb-1(for="secret") Admin password
-        input#secret.w-full.border.rounded.p-2(
-          type="password"
-          name="secret"
-          required
-          autofocus
-        )
+        if error
+          .admin-verify-error #{error}
 
-      button(type="submit" class="btn btn-dark w-full") Continue
+        form(action="/admin/verify" method="POST")
+          label.admin-verify-label(for="secret") Admin Password
+          input.admin-verify-input#secret(
+            type="password"
+            name="secret"
+            required
+            autofocus
+            placeholder="Enter admin password"
+          )
+          button.admin-verify-btn(type="submit") 🔒 Continue to Dashboard
+
+        p(style="text-align:center;margin-top:1.25rem;font-size:0.82rem;color:#94a3b8;")
+          a(href="/auth/login" style="color:#6366f1;font-weight:500;text-decoration:none;") ← Back to login

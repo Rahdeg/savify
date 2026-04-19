@@ -1,0 +1,415 @@
+/* ══════════════════════════════════════════════
+   Auth Page — Savify
+   Split-screen: left = form, right = illustration
+══════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* { box-sizing: border-box; }
+
+body.auth-page {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Container ─────────────────────────────── */
+
+.auth-screen {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.auth-card {
+  display: flex;
+  width: 100%;
+  max-width: 980px;
+  min-height: 600px;
+  background: #fff;
+  border-radius: 1.75rem;
+  box-shadow:
+    0 4px 6px rgba(0,0,0,0.04),
+    0 20px 60px rgba(79,70,229,0.12),
+    0 40px 80px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+/* ── Left panel (form) ─────────────────────── */
+
+.auth-left {
+  flex: 1;
+  padding: 3rem 2.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.auth-brand {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.auth-brand span {
+  color: #6366f1;
+}
+
+.auth-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.35rem;
+  line-height: 1.2;
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 2rem;
+}
+
+/* ── Alerts ────────────────────────────────── */
+
+.auth-alert {
+  padding: 0.7rem 1rem;
+  border-radius: 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.auth-alert-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.auth-alert-info {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+/* ── Form ──────────────────────────────────── */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.auth-form label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.35rem;
+  display: block;
+  margin-top: 0.85rem;
+}
+
+.auth-form label:first-child {
+  margin-top: 0;
+}
+
+.auth-form input,
+.auth-form select {
+  width: 100%;
+  padding: 0.72rem 0.95rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 0.65rem;
+  font-size: 0.9rem;
+  color: #111827;
+  background: #f9fafb;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  outline: none;
+  font-family: inherit;
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+  background: #fff;
+}
+
+.auth-form input::placeholder {
+  color: #9ca3af;
+}
+
+/* ── Submit button ─────────────────────────── */
+
+.auth-btn {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1.25rem;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s, transform 0.12s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(255,255,255,0.15), transparent);
+  pointer-events: none;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(99,102,241,0.45);
+  opacity: 0.95;
+}
+
+.auth-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+}
+
+/* ── Switch link ───────────────────────────── */
+
+.auth-switch {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 1.25rem;
+  text-align: center;
+}
+
+.auth-switch a {
+  color: #6366f1;
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 0.3rem;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+/* ── Right panel (illustration) ────────────── */
+
+.auth-right {
+  flex: 1.05;
+  background: linear-gradient(145deg, #4f46e5 0%, #6d28d9 45%, #7c3aed 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Decorative circles */
+.auth-right::before {
+  content: '';
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+  top: -130px;
+  right: -110px;
+  pointer-events: none;
+}
+
+.auth-right::after {
+  content: '';
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+  bottom: -90px;
+  left: -80px;
+  pointer-events: none;
+}
+
+.auth-right-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  width: 100%;
+  max-width: 340px;
+}
+
+.auth-illustration {
+  width: 210px;
+  height: 210px;
+  margin: 0 auto 1.5rem;
+  filter: drop-shadow(0 16px 40px rgba(0,0,0,0.25));
+}
+
+.auth-right-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 0.6rem;
+  line-height: 1.25;
+  font-family: 'Inter', sans-serif;
+}
+
+.auth-right-text {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.65;
+  margin: 0 0 1.75rem;
+  max-width: 260px;
+  display: block;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Feature pills */
+.auth-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  text-align: left;
+  width: 100%;
+}
+
+.auth-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255,255,255,0.12);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 0.75rem;
+  padding: 0.65rem 1rem;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.15s;
+}
+
+.auth-feature-item:hover {
+  background: rgba(255,255,255,0.18);
+}
+
+.auth-feature-icon {
+  width: 2rem;
+  height: 2rem;
+  background: rgba(255,255,255,0.2);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+/* ── OTP inputs ────────────────────────────── */
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 1.5rem;
+}
+
+.otp-row {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+
+.otp-input {
+  width: 3rem !important;
+  height: 3rem;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 0.65rem !important;
+  background: #f9fafb !important;
+  color: #111827;
+  padding: 0 !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+  outline: none;
+}
+
+.otp-input:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
+  background: #fff !important;
+}
+
+.auth-inline-form {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.auth-link-btn {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+.auth-link-btn:hover {
+  text-decoration: underline;
+}
+
+/* ── Responsive ────────────────────────────── */
+
+@media (max-width: 720px) {
+  .auth-right {
+    display: none;
+  }
+  .auth-left {
+    padding: 2.5rem 2rem;
+  }
+  .auth-card {
+    border-radius: 1.25rem;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 440px) {
+  .auth-screen {
+    padding: 0;
+    align-items: stretch;
+  }
+  .auth-card {
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .auth-left {
+    padding: 2rem 1.5rem;
+  }
+}

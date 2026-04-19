@@ -1,45 +1,59 @@
 extends layout
 
 block content
-  section(class='space-y-4 max-w-lg mx-auto')
-    h1(class='text-xl font-semibold') Withdraw: #{goal.goal_title}
+  .page-header
+    div
+      h1.page-title Withdraw Funds
+      p.page-subtitle Withdrawing from: #{goal.goal_title}
+    a.btn.btn-secondary(href=`/goals/${goal.goal_id}`) ← Back to Goal
 
-    p(class='text-slate-600')
-      | You are about to withdraw
-      strong  £#{goal.current_amount}
-      |  from this goal. This action cannot be undone.
+  .form-page-wrap
 
-    if session.errorMessage
-      .alert.alert-danger= session.errorMessage
-      - delete session.errorMessage
+    //- Warning card
+    .form-card(style="margin-bottom:1.25rem;border-left:4px solid #f59e0b;")
+      .form-card-body(style="padding:1.25rem 1.5rem;")
+        p(style="font-size:0.9rem;color:#374151;margin:0;")
+          | You are about to withdraw
+          strong(style="color:#6366f1;")  £#{parseFloat(goal.current_amount).toFixed(2)}
+          |  from this goal. This action cannot be undone.
+
+    if session && session.errorMessage
+      .alert-danger #{session.errorMessage}
 
     if accounts && accounts.length
-      form(action=`/goals/${goal.goal_id}/withdraw` method="POST" class="space-y-4")
+      .form-card
+        .form-card-header
+          p.form-card-title Withdrawal Details
 
-        div
-          label.block.text-sm.font-medium.mb-1(for="user_account_id") Payout account
-          select#user_account_id.w-full.border.rounded.p-2(name="user_account_id" required)
-            option(value="") Select an account
-            each acc in accounts
-              option(value=acc.account_id) #{acc.account_name} — #{acc.bank_name} (****#{acc.account_number.slice(-4)})
-          a.text-sm.link-text(href="/accounts/add") + Add a new account
+        .form-card-body
+          form(action=`/goals/${goal.goal_id}/withdraw` method="POST")
 
-        div
-          label.block.text-sm.font-medium.mb-1(for="reason_for_withdrawal") Reason for withdrawal
-          textarea#reason_for_withdrawal.w-full.border.rounded.p-2(
-            name="reason_for_withdrawal"
-            rows="4"
-            placeholder="Enter your reason for withdrawal"
-            required
-          )
+            .form-group
+              label.form-label(for="user_account_id") Payout Account
+              select.form-control#user_account_id(name="user_account_id" required)
+                option(value="") Select an account
+                each acc in accounts
+                  option(value=acc.account_id) #{acc.account_name} — #{acc.bank_name} (****#{acc.account_number.slice(-4)})
+              a.link-text(href="/accounts/add" style="font-size:0.8rem;margin-top:0.4rem;display:inline-block;") + Add a new account
 
-        div(class='flex gap-3')
-          button(type="submit" class="btn btn-dark") Confirm Withdrawal
-          a(href=`/goals/${goal.goal_id}` class='btn btn-secondary') Cancel
+            .form-group
+              label.form-label(for="reason_for_withdrawal") Reason for Withdrawal
+              textarea.form-control#reason_for_withdrawal(
+                name="reason_for_withdrawal"
+                rows="4"
+                placeholder="Enter your reason for withdrawal"
+                required
+                style="resize:vertical;"
+              )
+
+            .form-actions
+              button.btn.btn-primary(type="submit") Confirm Withdrawal
+              a.btn.btn-secondary(href=`/goals/${goal.goal_id}`) Cancel
 
     else
-      .card.text-center.space-y-3
-        p(class='text-slate-600') You have no payout accounts saved.
-        p(class='text-slate-500 text-sm') Add a bank account before making a withdrawal.
-        a.btn.btn-dark(href="/accounts/add") Add Payout Account
-        a(href=`/goals/${goal.goal_id}` class='block text-sm link-text mt-2') Back to goal
+      .form-card(style="text-align:center;padding:2rem;")
+        p(style="color:#6b7280;margin-bottom:0.75rem;") You have no payout accounts saved.
+        p(style="color:#9ca3af;font-size:0.85rem;margin-bottom:1.25rem;") Add a bank account before making a withdrawal.
+        a.btn-primary(href="/accounts/add" style="display:inline-flex;margin-bottom:0.75rem;") + Add Payout Account
+        br
+        a.link-text(href=`/goals/${goal.goal_id}` style="font-size:0.85rem;") Back to goal

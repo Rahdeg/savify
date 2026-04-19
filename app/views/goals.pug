@@ -6,8 +6,8 @@ block content
 
   .page-header
     div
-      h1.page-title Goals
-      p.page-subtitle Here you can set your savings goals and track your progress towards achieving them.
+      h1.page-title 🎯 My Goals
+      p.page-subtitle Set savings goals and track your progress towards achieving them.
     button.btn-primary(type="button" onclick="openCreateGoalModal()") + New Goal
 
   if fetchedGoals && fetchedGoals.length
@@ -24,28 +24,32 @@ block content
             span(class=`badge ${badgeCls}`) #{goal.goal_status}
 
           if goal.category_name
-            p.goal-category #{goal.category_name}
+            p.goal-category 📂 #{goal.category_name}
 
           .goal-card-amounts
             span.goal-amount £#{parseFloat(goal.current_amount).toFixed(2)}
-            span.goal-target Target: £#{parseFloat(goal.target_amount).toFixed(2)}
+            span.goal-target of £#{parseFloat(goal.target_amount).toFixed(2)}
 
-          //- Arc gauge
+          //- Arc gauge with gradient
           .arc-wrap
             svg(viewBox="0 0 100 58" width="140" height="82")
+              defs
+                linearGradient(id=`grad-${goal.goal_id}` x1="0%" y1="0%" x2="100%" y2="0%")
+                  stop(offset="0%" stop-color="#6366f1")
+                  stop(offset="100%" stop-color="#8b5cf6")
               path(
                 d="M 12,54 A 38,38 0 0,1 88,54"
                 fill="none"
-                stroke="#e2e8f0"
-                stroke-width="12"
+                stroke="#e5e7eb"
+                stroke-width="10"
                 stroke-linecap="round"
               )
               if pct > 0
                 path(
                   d="M 12,54 A 38,38 0 0,1 88,54"
                   fill="none"
-                  stroke="#1e293b"
-                  stroke-width="12"
+                  stroke=`url(#grad-${goal.goal_id})`
+                  stroke-width="10"
                   stroke-linecap="round"
                   stroke-dasharray=`${filled} ${arcLen}`
                 )
@@ -53,12 +57,13 @@ block content
 
           .goal-card-meta
             if goal.end_date
-              span.goal-meta-item By #{formatDate(goal.end_date)}
+              p.goal-meta-item 📅 By #{formatDate(goal.end_date)}
 
           a.link-text(href=`/goals/${goal.goal_id}`) View details →
 
   else
-    .goals-empty
-      button.goals-empty-btn(type="button" onclick="openCreateGoalModal()")
-        | +
-      p.goals-empty-text Start Saving
+    .dash-section(style="text-align:center;padding:3rem 1rem;")
+      .goals-empty
+        button.goals-empty-btn(type="button" onclick="openCreateGoalModal()") +
+        p.goals-empty-text You haven't set any goals yet.
+        button.btn-primary(type="button" onclick="openCreateGoalModal()") Create your first goal

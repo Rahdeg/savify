@@ -1,70 +1,102 @@
 extends layout
 
 block content
-  section(class='space-y-4')
-    h1(class='text-xl font-semibold') Goal Details
+  - const pct = goal ? Math.min(Math.round((parseFloat(goal.current_amount) / parseFloat(goal.target_amount)) * 100), 100) : 0
 
-    if goal
-      .card
-        h2(class='text-lg font-semibold mb-2') #{goal.goal_title}
-        p #[span.label Category:] #{goal.category_name}
-        p #[span.label Target Amount:] £#{goal.target_amount}
-        p #[span.label Current Amount:] £#{goal.current_amount}
-        p #[span.label Status:] #{goal.goal_status}
-        p #[span.label End Date:] #{formatDate(goal.end_date)}
+  .page-header
+    div
+      h1.page-title Goal Details
+      p.page-subtitle Track your progress and manage this savings goal.
+    a.btn.btn-secondary(href="/goals") ← Back to Goals
 
-        if goal.goal_description
-          p.mt-2
-            span.label Description:
-            |  #{goal.goal_description}
+  if goal
+    .detail-wrap
 
-        //- Success / error messages
-        if session.successMessage
-          .alert.alert-success= session.successMessage
-          - delete session.successMessage
+      //- ── Left: goal info card ────────────────────────────────────────────
+      .detail-card
+        .detail-card-header
+          h2.detail-card-title #{goal.goal_title}
+          if goal.category_name
+            p(style="font-size:0.82rem;color:rgba(255,255,255,0.75);margin:0.2rem 0 0;") 📂 #{goal.category_name}
 
-        if session.errorMessage
-          .alert.alert-danger= session.errorMessage
-          - delete session.errorMessage
+        .detail-card-body
+          .detail-row
+            span.detail-row-label Target Amount
+            span.detail-row-value £#{parseFloat(goal.target_amount).toFixed(2)}
+          .detail-row
+            span.detail-row-label Saved So Far
+            span.detail-row-value(style="color:#6366f1;") £#{parseFloat(goal.current_amount).toFixed(2)}
+          .detail-row
+            span.detail-row-label Remaining
+            span.detail-row-value £#{(parseFloat(goal.target_amount) - parseFloat(goal.current_amount)).toFixed(2)}
+          .detail-row
+            span.detail-row-label Status
+            - const badgeCls = goal.goal_status === 'completed' ? 'badge-blue' : goal.goal_status === 'active' ? 'badge-green' : 'badge-grey'
+            span(class=`badge ${badgeCls}`) #{goal.goal_status}
+          if goal.end_date
+            .detail-row
+              span.detail-row-label End Date
+              span.detail-row-value #{formatDate(goal.end_date)}
+
+          if goal.goal_description
+            .detail-row(style="flex-direction:column;align-items:flex-start;gap:0.3rem;")
+              span.detail-row-label Description
+              span.detail-row-value(style="font-weight:400;color:#374151;") #{goal.goal_description}
+
+        //- Progress bar
+        .detail-progress
+          .progress-label
+            span Progress
+            span #{pct}%
+          .progress-bar
+            .progress-fill(style=`width:${pct}%`)
+
+        //- Alerts
+        if session && session.successMessage
+          .alert-success(style="margin:0 1.5rem 0.5rem;") #{session.successMessage}
+        if session && session.errorMessage
+          .alert-danger(style="margin:0 1.5rem 0.5rem;") #{session.errorMessage}
 
         //- Action buttons
-        .flex.flex-col.gap-2.mt-3
-
-          //- Contribute — only for active goals
+        .detail-actions
           if goal.goal_status === 'active'
-            a.btn.btn-dark(href=`/goals/${goal.goal_id}/contribute`) Add Saving
-
-          //- Withdraw
+            a.btn.btn-primary(href=`/goals/${goal.goal_id}/contribute`) 💰 Add Saving
           if goal.goal_status === 'completed'
-            a.btn.btn-dark(href=`/goals/${goal.goal_id}/withdraw`) Withdraw
-
+            a.btn.btn-success(href=`/goals/${goal.goal_id}/withdraw`) Withdraw Funds
           else if goal.goal_status === 'withdrawn'
-            button(class="btn btn-dark" disabled) Already Withdrawn
-
+            button.btn.btn-secondary(disabled) Already Withdrawn
           else if goal.goal_status === 'cancelled'
-            button(class="btn btn-dark" disabled) Goal Cancelled
-
+            button.btn.btn-secondary(disabled) Goal Cancelled
           else if goal.goal_status !== 'active'
-            button(class="btn btn-dark" disabled) Withdraw (Goal Not Completed Yet)
+            button.btn.btn-secondary(disabled) Goal Not Completed Yet
 
-      h3(class='text-lg font-semibold') Transactions
-      if transactions && transactions.length
-        .table-wrap
-          table.app-table
-            thead
-              tr
-                th Type
-                th Amount
-                th Status
-                th Date
-            tbody
-              each txn in transactions
-                tr
-                  td #{txn.transaction_type}
-                  td £#{txn.amount}
-                  td #{txn.transaction_status}
-                  td #{formatDateTime(txn.transaction_date)}
-      else
-        p No transactions found for this goal.
-    else
-      p Goal not found.
+      //- ── Right: transactions ─────────────────────────────────────────────
+      div
+        .dash-section
+          .dash-section-header
+            h2.dash-section-title Transactions
+          if transactions && transactions.length
+            .table-wrap
+              table.app-table
+                thead
+                  tr
+                    th Type
+                    th Amount
+                    th Status
+                    th Date
+                tbody
+                  each txn in transactions
+                    tr
+                      td #{txn.transaction_type}
+                      td(style="font-weight:600;") £#{parseFloat(txn.amount).toFixed(2)}
+                      td
+                        - const tBadge = txn.transaction_status === 'completed' ? 'badge-green' : 'badge-grey'
+                        span(class=`badge ${tBadge}`) #{txn.transaction_status}
+                      td #{formatDateTime(txn.transaction_date)}
+          else
+            p.empty-msg No transactions for this goal yet.
+
+  else
+    .dash-section(style="text-align:center;padding:3rem;")
+      p.empty-msg Goal not found.
+      a.btn-primary(href="/goals" style="display:inline-flex;margin-top:1rem;") Back to Goals
