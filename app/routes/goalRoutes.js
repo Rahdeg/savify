@@ -9,5 +9,6 @@ router.get("/categories", requireAuth, categoryController.showCategories);
 router.post("/create", requireAuth, goalController.createGoal);
 router.get("/:id", goalController.showGoalDetails);
 router.get("/:id/transactions", goalController.showTransactions);
-router.post("/:id/withdraw", goalController.withdrawGoal);
+router.get("/:id/withdraw", requireAuth, goalController.showWithdrawPage);
+router.post("/:id/withdraw", requireAuth, goalController.withdrawGoal);
 module.exports = router;

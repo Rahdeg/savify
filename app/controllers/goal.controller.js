@@ -1,5 +1,6 @@
 const { Goal } = require("../models/goal");
 const { User } = require("../models/user");
+const { UserAccount } = require("../models/userAccount");
 
 exports.listGoals = async (req, res) => {
   try {
@@ -70,17 +71,16 @@ exports.createGoal = async (req, res) => {
     // saving_frequency only describes how often the user makes deposits.
     const withdrawal_date_formatted = end_date;
 
-    // if (new Date(end_date) <= startDateObj) {
-    //   return res.status(400).json({ error: "End date must be after start date." });
-    // } //  this will be uncommented later once we implement the withdrawal flow and can use the actual end date as the scheduled withdrawal date
+    if (new Date(end_date) <= startDateObj) {
+      return res.status(400).json({ error: "End date must be after start date." });
+    }
 
     const goal = new Goal();
     await goal.createGoal({
       userId,
       goal_title: title,
       goal_description: description,
-      // scheduled_withdrawal_date: withdrawal_date_formatted,
-      scheduled_withdrawal_date: "2026-04-17", // this is hardcoded for testing purposes until we implement the withdrawal flow and can use the actual end date as the scheduled withdrawal date
+      scheduled_withdrawal_date: withdrawal_date_formatted,
       category_id: category,
       current_amount: 0,
       target_amount: amount,
@@ -135,25 +135,71 @@ exports.showTransactions = async (req, res) => {
   }
 };
 
+exports.showWithdrawPage = async (req, res) => {
+  try {
+    const goalId = req.params.id;
+    const sessionUserId = req.session?.user?.user_id;
+
+    const goal = new Goal(goalId);
+    const goalDetails = await goal.getGoalDetails();
+
+    if (!goalDetails) return res.status(404).send("Goal not found");
+
+    if (goal.user_id !== sessionUserId) {
+      return res.status(403).redirect(`/goals/${goalId}`);
+    }
+
+    if (goal.goal_status !== "completed") {
+      req.session.errorMessage = "Only completed goals can be withdrawn.";
+      return res.redirect(`/goals/${goalId}`);
+    }
+
+    const accounts = await UserAccount.getByUser(sessionUserId);
+
+    res.render("withdraw-goal", {
+      title: "Withdraw Goal",
+      goal,
+      accounts,
+      session: req.session,
+    });
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+};
+
 exports.withdrawGoal = async (req, res) => {
   try {
     // Step 1: Get goal ID from URL and reason from form body
     const goalId = req.params.id;
-    const { reason_for_withdrawal } = req.body;
+    const { reason_for_withdrawal, user_account_id } = req.body;
+    const sessionUserId = req.session?.user?.user_id;
 
-    // Step 2: Load the goal model
+    // Step 2: Load the goal and verify ownership
     const goal = new Goal(goalId);
+    const goalDetails = await goal.getGoalDetails();
+
+    if (!goalDetails) {
+      req.session.errorMessage = "Goal not found.";
+      return res.redirect(`/goals`);
+    }
+
+    if (goal.user_id !== sessionUserId) {
+      req.session.errorMessage = "You are not authorised to withdraw this goal.";
+      return res.redirect(`/goals/${goalId}`);
+    }
 
     // Step 3: Call the withdraw method — handles all DB logic
-    const result = await goal.withdraw(reason_for_withdrawal);
+    const result = await goal.withdraw(reason_for_withdrawal, user_account_id);
 
     // Step 4: Redirect back to goal details with success message
     req.session.successMessage = `Withdrawal of £${result.amount} successful! Reference: ${result.reference}`;
     res.redirect(`/goals/${goalId}`);
 
   } catch (err) {
-    // If not eligible or DB error, redirect back with error
-    req.session.errorMessage = err.message;
+    console.error(err);
+    req.session.errorMessage = err.isUserFacing
+      ? err.message
+      : "Unable to complete that action right now, please try again later.";
     res.redirect(`/goals/${req.params.id}`);
   }
 };

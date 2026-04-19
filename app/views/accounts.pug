@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  section(class='space-y-4')
+    h1(class='text-xl font-semibold') My Payout Accounts
+
+    if session.successMessage
+      .alert.alert-success= session.successMessage
+      - delete session.successMessage
+
+    if session.errorMessage
+      .alert.alert-danger= session.errorMessage
+      - delete session.errorMessage
+
+    a.btn.btn-dark(href="/accounts/add") + Add Account
+
+    if accounts && accounts.length
+      .grid(class='grid-cols-1 md:grid-cols-2 gap-4 mt-4')
+        each acc in accounts
+          article.card
+            h2(class='text-lg font-semibold mb-1') #{acc.account_name}
+            p #[span.label Bank:] #{acc.bank_name}
+            p #[span.label Account number:] ****#{acc.account_number.slice(-4)}
+            p #[span.label Sort code:] #{acc.sort_code}
+            p #[span.label Type:] #{acc.account_type}
+    else
+      p.text-slate-600 No accounts saved yet.

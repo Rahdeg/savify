@@ -1,0 +1,45 @@
+extends layout
+
+block content
+  section(class='space-y-4 max-w-lg mx-auto')
+    h1(class='text-xl font-semibold') Withdraw: #{goal.goal_title}
+
+    p(class='text-slate-600')
+      | You are about to withdraw
+      strong  £#{goal.current_amount}
+      |  from this goal. This action cannot be undone.
+
+    if session.errorMessage
+      .alert.alert-danger= session.errorMessage
+      - delete session.errorMessage
+
+    if accounts && accounts.length
+      form(action=`/goals/${goal.goal_id}/withdraw` method="POST" class="space-y-4")
+
+        div
+          label.block.text-sm.font-medium.mb-1(for="user_account_id") Payout account
+          select#user_account_id.w-full.border.rounded.p-2(name="user_account_id" required)
+            option(value="") Select an account
+            each acc in accounts
+              option(value=acc.account_id) #{acc.account_name} — #{acc.bank_name} (****#{acc.account_number.slice(-4)})
+          a.text-sm.link-text(href="/accounts/add") + Add a new account
+
+        div
+          label.block.text-sm.font-medium.mb-1(for="reason_for_withdrawal") Reason for withdrawal
+          textarea#reason_for_withdrawal.w-full.border.rounded.p-2(
+            name="reason_for_withdrawal"
+            rows="4"
+            placeholder="Enter your reason for withdrawal"
+            required
+          )
+
+        div(class='flex gap-3')
+          button(type="submit" class="btn btn-dark") Confirm Withdrawal
+          a(href=`/goals/${goal.goal_id}` class='btn btn-secondary') Cancel
+
+    else
+      .card.text-center.space-y-3
+        p(class='text-slate-600') You have no payout accounts saved.
+        p(class='text-slate-500 text-sm') Add a bank account before making a withdrawal.
+        a.btn.btn-dark(href="/accounts/add") Add Payout Account
+        a(href=`/goals/${goal.goal_id}` class='block text-sm link-text mt-2') Back to goal
