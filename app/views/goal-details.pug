@@ -1,7 +1,15 @@
 extends layout
 
 block content
-  - const pct = goal ? Math.min(Math.round((parseFloat(goal.current_amount) / parseFloat(goal.target_amount)) * 100), 100) : 0
+  - const target = goal ? (parseFloat(goal.target_amount) || 0) : 0
+  - const current = goal ? (parseFloat(goal.current_amount) || 0) : 0
+  - const remaining = Math.max(0, target - current)
+  - const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0
+  - const fmt = (n) => {
+  -   if (Number.isNaN(n)) return '0'
+  -   // show no decimals for whole pounds, otherwise two decimals
+  -   return Number(n) % 1 === 0 ? Number(n).toFixed(0) : Number(n).toFixed(2)
+  - }
 
   .page-header
     div
@@ -22,13 +30,13 @@ block content
         .detail-card-body
           .detail-row
             span.detail-row-label Target Amount
-            span.detail-row-value £#{parseFloat(goal.target_amount).toFixed(2)}
+            span.detail-row-value £#{fmt(target)}
           .detail-row
             span.detail-row-label Saved So Far
-            span.detail-row-value(style="color:#6366f1;") £#{parseFloat(goal.current_amount).toFixed(2)}
+            span.detail-row-value(style="color:#6366f1;") £#{fmt(current)}
           .detail-row
             span.detail-row-label Remaining
-            span.detail-row-value £#{(parseFloat(goal.target_amount) - parseFloat(goal.current_amount)).toFixed(2)}
+            span.detail-row-value £#{fmt(remaining)}
           .detail-row
             span.detail-row-label Status
             - const badgeCls = goal.goal_status === 'completed' ? 'badge-blue' : goal.goal_status === 'active' ? 'badge-green' : 'badge-grey'
@@ -49,7 +57,7 @@ block content
             span Progress
             span #{pct}%
           .progress-bar
-            .progress-fill(style=`width:${pct}%`)
+            .progress-fill(style=`width:${pct}%`, aria-valuenow=pct, aria-valuemin="0", aria-valuemax="100")
 
         //- Alerts
         if session && session.successMessage

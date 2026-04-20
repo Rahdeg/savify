@@ -9,51 +9,84 @@ block content
 
   .form-page-wrap
 
-    //- Warning card
-    .form-card(style="margin-bottom:1.25rem;border-left:4px solid #f59e0b;")
+  if bonus && bonus.eligible
+    .form-card(style="margin-bottom:1.25rem;border-left:4px solid #10b981;")
       .form-card-body(style="padding:1.25rem 1.5rem;")
-        p(style="font-size:0.9rem;color:#374151;margin:0;")
-          | You are about to withdraw
-          strong(style="color:#6366f1;")  £#{parseFloat(goal.current_amount).toFixed(2)}
-          |  from this goal. This action cannot be undone.
+        p(style="font-size:0.95rem;font-weight:600;color:#065f46;margin:0 0 0.5rem;") Consistency Bonus Earned!
+        p(style="font-size:0.875rem;color:#374151;margin:0 0 0.75rem;")
+          | You saved consistently in
+          strong  #{bonus.actualCount} of #{bonus.expectedCount} expected periods
+          |  — qualifying you for a
+          strong  #{bonus.bonusPercentage}% loyalty bonus.
+        .form-card(style="background:#f0fdf4;border:1px solid #bbf7d0;margin:0;")
+          .form-card-body(style="padding:0.75rem 1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;")
+            span(style="font-size:0.85rem;color:#6b7280;") Saved amount
+            strong(style="color:#374151;") £#{parseFloat(goal.current_amount).toFixed(2)}
+          .form-card-body(style="padding:0 1rem 0.5rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;")
+            span(style="font-size:0.85rem;color:#10b981;") #{bonus.bonusPercentage}% bonus
+            strong(style="color:#10b981;") + £#{parseFloat(bonus.bonusAmount).toFixed(2)}
+          .form-card-body(style="padding:0.5rem 1rem 0.75rem;border-top:1px solid #bbf7d0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;")
+            span(style="font-size:0.9rem;font-weight:600;color:#374151;") Total payout
+            strong(style="font-size:1rem;color:#6366f1;") £#{(parseFloat(goal.current_amount) + parseFloat(bonus.bonusAmount)).toFixed(2)}
+  else if bonus
+    .form-card(style="margin-bottom:1.25rem;border-left:4px solid #d1d5db;")
+      .form-card-body(style="padding:1.25rem 1.5rem;")
+        p(style="font-size:0.875rem;color:#374151;margin:0 0 0.25rem;") No consistency bonus this time.
+        p(style="font-size:0.8rem;color:#6b7280;margin:0;")
+          | You contributed in
+          strong  #{bonus.actualCount} of #{bonus.expectedCount} expected #{goal.saving_frequency} periods
+          | . Saving consistently in 75% or more of your expected periods qualifies you for a 3% bonus.
 
-    if session && session.errorMessage
-      .alert-danger #{session.errorMessage}
+  //- Warning card
+  .form-card(style="margin-bottom:1.25rem;border-left:4px solid #f59e0b;")
+    .form-card-body(style="padding:1.25rem 1.5rem;")
+      p(style="font-size:0.9rem;color:#374151;margin:0;")
+        | You are about to withdraw
+        //- strong(style="color:#6366f1;")  £#{parseFloat(goal.current_amount).toFixed(2)}
+        //- |  from this goal. This action cannot be undone.
+        strong(style="color:#6366f1;")
+          if bonus && bonus.eligible
+            |  £#{(parseFloat(goal.current_amount) + parseFloat(bonus.bonusAmount)).toFixed(2)}
+          else
+            |  £#{parseFloat(goal.current_amount).toFixed(2)}
 
-    if accounts && accounts.length
-      .form-card
-        .form-card-header
-          p.form-card-title Withdrawal Details
+  if session && session.errorMessage
+    .alert-danger #{session.errorMessage}
 
-        .form-card-body
-          form(action=`/goals/${goal.goal_id}/withdraw` method="POST")
+  if accounts && accounts.length
+    .form-card
+      .form-card-header
+        p.form-card-title Withdrawal Details
 
-            .form-group
-              label.form-label(for="user_account_id") Payout Account
-              select.form-control#user_account_id(name="user_account_id" required)
-                option(value="") Select an account
-                each acc in accounts
-                  option(value=acc.account_id) #{acc.account_name} — #{acc.bank_name} (****#{acc.account_number.slice(-4)})
-              a.link-text(href="/accounts/add" style="font-size:0.8rem;margin-top:0.4rem;display:inline-block;") + Add a new account
+      .form-card-body
+        form(action=`/goals/${goal.goal_id}/withdraw` method="POST")
 
-            .form-group
-              label.form-label(for="reason_for_withdrawal") Reason for Withdrawal
-              textarea.form-control#reason_for_withdrawal(
-                name="reason_for_withdrawal"
-                rows="4"
-                placeholder="Enter your reason for withdrawal"
-                required
-                style="resize:vertical;"
-              )
+          .form-group
+            label.form-label(for="user_account_id") Payout Account
+            select.form-control#user_account_id(name="user_account_id" required)
+              option(value="") Select an account
+              each acc in accounts
+                option(value=acc.account_id) #{acc.account_name} — #{acc.bank_name} (****#{acc.account_number.slice(-4)})
+            a.link-text(href="/accounts/add" style="font-size:0.8rem;margin-top:0.4rem;display:inline-block;") + Add a new account
 
-            .form-actions
-              button.btn.btn-primary(type="submit") Confirm Withdrawal
-              a.btn.btn-secondary(href=`/goals/${goal.goal_id}`) Cancel
+          .form-group
+            label.form-label(for="reason_for_withdrawal") Reason for Withdrawal
+            textarea.form-control#reason_for_withdrawal(
+              name="reason_for_withdrawal"
+              rows="4"
+              placeholder="Enter your reason for withdrawal"
+              required
+              style="resize:vertical;"
+            )
 
-    else
-      .form-card(style="text-align:center;padding:2rem;")
-        p(style="color:#6b7280;margin-bottom:0.75rem;") You have no payout accounts saved.
-        p(style="color:#9ca3af;font-size:0.85rem;margin-bottom:1.25rem;") Add a bank account before making a withdrawal.
-        a.btn-primary(href="/accounts/add" style="display:inline-flex;margin-bottom:0.75rem;") + Add Payout Account
-        br
-        a.link-text(href=`/goals/${goal.goal_id}` style="font-size:0.85rem;") Back to goal
+          .form-actions
+            button.btn.btn-primary(type="submit") Confirm Withdrawal
+            a.btn.btn-secondary(href=`/goals/${goal.goal_id}`) Cancel
+
+  else
+    .form-card(style="text-align:center;padding:2rem;")
+      p(style="color:#6b7280;margin-bottom:0.75rem;") You have no payout accounts saved.
+      p(style="color:#9ca3af;font-size:0.85rem;margin-bottom:1.25rem;") Add a bank account before making a withdrawal.
+      a.btn-primary(href="/accounts/add" style="display:inline-flex;margin-bottom:0.75rem;") + Add Payout Account
+      br
+      a.link-text(href=`/goals/${goal.goal_id}` style="font-size:0.85rem;") Back to goal
