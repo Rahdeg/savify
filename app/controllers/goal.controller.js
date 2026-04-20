@@ -223,11 +223,13 @@ exports.showWithdrawPage = async (req, res) => {
     }
 
     const accounts = await UserAccount.getByUser(sessionUserId);
+    const bonus = await goal.checkBonusEligibility();
 
     res.render("withdraw-goal", {
       title: "Withdraw Goal",
       goal,
       accounts,
+      bonus,
       session: req.session,
     });
   } catch (err) {
@@ -260,7 +262,9 @@ exports.withdrawGoal = async (req, res) => {
     const result = await goal.withdraw(reason_for_withdrawal, user_account_id);
 
     // Step 4: Redirect back to goal details with success message
-    req.session.successMessage = `Withdrawal of £${result.amount} successful! Reference: ${result.reference}`;
+    req.session.successMessage = result.bonusEligible
+      ? `Withdrawal successful! £${result.amount} + £${result.bonusAmount} bonus = £${result.totalAmount} total. Reference: ${result.reference}`
+      : `Withdrawal of £${result.amount} successful! Reference: ${result.reference}`;
     res.redirect(`/goals/${goalId}`);
 
   } catch (err) {

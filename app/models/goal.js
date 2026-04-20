@@ -176,55 +176,158 @@ async createGoal({ userId, goal_title, goal_description, scheduled_withdrawal_da
     return { amount: contribution, reference, newTotal, completed: reachedTarget };
   }
 
+  async checkBonusEligibility() {
+    await this.getGoalDetails();
+
+    const BONUS_PERCENTAGE = 3;
+    const CONSISTENCY_THRESHOLD = 0.75;
+
+    const deposits = await db.query(
+      `SELECT DATE(transaction_date) as contribution_date
+       FROM transactions
+       WHERE goal_id = ? AND transaction_type = 'deposit'
+       ORDER BY transaction_date ASC`,
+      [this.goal_id]
+    );
+
+    if (!deposits.length) {
+      return { eligible: false, bonusAmount: 0, bonusPercentage: BONUS_PERCENTAGE, actualCount: 0, expectedCount: 0 };
+    }
+
+    const startDate = new Date(this.start_date);
+    const endDate = new Date(this.end_date);
+    const expectedCount = this._calculateExpectedPeriods(startDate, endDate, this.saving_frequency);
+    const actualCount = this._countUniquePeriods(
+      deposits.map(d => new Date(d.contribution_date)),
+      this.saving_frequency
+    );
+
+    const eligible = expectedCount > 0 && (actualCount / expectedCount) >= CONSISTENCY_THRESHOLD;
+    const bonusAmount = eligible
+      ? parseFloat((parseFloat(this.current_amount) * BONUS_PERCENTAGE / 100).toFixed(2))
+      : 0;
+
+    return { eligible, bonusAmount, bonusPercentage: BONUS_PERCENTAGE, actualCount, expectedCount };
+  }
+
+  _calculateExpectedPeriods(startDate, endDate, frequency) {
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const days = Math.ceil((endDate - startDate) / msPerDay) + 1;
+
+    switch (frequency) {
+      case 'daily':
+        return days;
+      case 'weekly':
+        return Math.ceil(days / 7);
+      case 'monthly': {
+        const months = (endDate.getFullYear() - startDate.getFullYear()) * 12
+          + (endDate.getMonth() - startDate.getMonth()) + 1;
+        return Math.max(1, months);
+      }
+      default:
+        return 1;
+    }
+  }
+
+  _countUniquePeriods(dates, frequency) {
+    const keys = new Set();
+    for (const d of dates) {
+      let key;
+      switch (frequency) {
+        case 'daily':
+          key = d.toISOString().slice(0, 10);
+          break;
+        case 'weekly': {
+          const jan4 = new Date(d.getFullYear(), 0, 4);
+          const week = Math.ceil(((d - jan4) / 86400000 + jan4.getDay() + 1) / 7);
+          key = `${d.getFullYear()}-W${week}`;
+          break;
+        }
+        case 'monthly':
+          key = `${d.getFullYear()}-${d.getMonth()}`;
+          break;
+        default:
+          key = d.toISOString().slice(0, 10);
+      }
+      keys.add(key);
+    }
+    return keys.size;
+  }
+
   async withdraw(reasonForWithdrawal, userAccountId) {
-  // Step 1: Make sure goal details are loaded
-  await this.getGoalDetails();
+    // Step 1: Make sure goal details are loaded
+    await this.getGoalDetails();
 
-  // Step 2: Check eligibility — must be completed
-  // if (this.goal_status !== 'completed') {
-  //   throw new Error('Goal is not eligible for withdrawal. It must be completed first.');
-  // } //   this will be uncommented later.
+    // Step 2: Check eligibility — must be completed
+    if (this.goal_status !== 'completed') {
+      const err = new Error('Only completed goals can be withdrawn.');
+      err.isUserFacing = true;
+      throw err;
+    }
 
-  const amount = this.current_amount;
-  const reference = 'WDR' + Date.now();
+    // Step 3: Check bonus eligibility
+    const bonus = await this.checkBonusEligibility();
+    const baseAmount = parseFloat(this.current_amount);
+    const totalAmount = parseFloat((baseAmount + bonus.bonusAmount).toFixed(2));
+    const reference = 'WDR' + Date.now();
 
-  // Step 3: Update goal status to withdrawn and reset current amount
-  await db.query(
-    `UPDATE savings_goal
-     SET goal_status = 'withdrawn', current_amount = 0
-     WHERE goal_id = ?`,
-    [this.goal_id]
-  );
+    // Step 4: Update goal status to withdrawn and reset current amount
+    await db.query(
+      `UPDATE savings_goal
+       SET goal_status = 'withdrawn', current_amount = 0
+       WHERE goal_id = ?`,
+      [this.goal_id]
+    );
 
-  // Step 4: Record in withdrawal table including the user's chosen payout account
-  await db.query(
-    `INSERT INTO withdrawal
-      (requested_amount, approved_amount, reason_for_withdrawal, eligibility_status, withdrawal_status, processed_at, goal_id, user_account_id)
-     VALUES (?, ?, ?, 'eligible', 'approved', NOW(), ?, ?)`,
-    [amount, amount, reasonForWithdrawal || null, this.goal_id, userAccountId || null]
-  );
+    // Step 5: Record in withdrawal table with total payout amount
+    await db.query(
+      `INSERT INTO withdrawal
+        (requested_amount, approved_amount, reason_for_withdrawal, eligibility_status, withdrawal_status, processed_at, goal_id, user_account_id)
+       VALUES (?, ?, ?, 'eligible', 'approved', NOW(), ?, ?)`,
+      [baseAmount, totalAmount, reasonForWithdrawal || null, this.goal_id, userAccountId || null]
+    );
 
-  // Step 5: Record in transactions table
-  await db.query(
-    `INSERT INTO transactions
-      (transaction_type, amount, transaction_reference, transaction_status, goal_id)
-     VALUES ('withdrawal', ?, ?, 'completed', ?)`,
-    [amount, reference, this.goal_id]
-  );
+    // Step 6: Record base withdrawal transaction
+    await db.query(
+      `INSERT INTO transactions
+        (transaction_type, amount, transaction_reference, transaction_status, goal_id)
+       VALUES ('withdrawal', ?, ?, 'completed', ?)`,
+      [baseAmount, reference, this.goal_id]
+    );
 
-  // Step 6: Log in activity_log
-  await db.query(
-    `INSERT INTO activity_log (user_id, activity_type, activity_message)
-     VALUES (?, 'Withdrawal', ?)`,
-    [this.user_id, `Withdrawal of ${amount} processed for goal ID ${this.goal_id}`]
-  );
+    // Step 7: If eligible, record bonus in bonus table and transactions
+    if (bonus.eligible) {
+      await db.query(
+        `INSERT INTO bonus (bonus_percentage, bonus_amount, eligibility_status, goal_id)
+         VALUES (?, ?, 'eligible', ?)`,
+        [bonus.bonusPercentage, bonus.bonusAmount, this.goal_id]
+      );
 
-  // Step 7: Update local state
-  this.goal_status = 'withdrawn';
-  this.current_amount = 0;
+      await db.query(
+        `INSERT INTO transactions
+          (transaction_type, amount, transaction_reference, transaction_status, goal_id)
+         VALUES ('bonus', ?, ?, 'completed', ?)`,
+        [bonus.bonusAmount, 'BON' + Date.now(), this.goal_id]
+      );
+    }
 
-  return { amount, reference };
-}
+    // Step 8: Log in activity_log
+    const logMessage = bonus.eligible
+      ? `Withdrawal of £${baseAmount} + £${bonus.bonusAmount} bonus processed for goal "${this.goal_title}"`
+      : `Withdrawal of £${baseAmount} processed for goal "${this.goal_title}"`;
+
+    await db.query(
+      `INSERT INTO activity_log (user_id, activity_type, activity_message)
+       VALUES (?, 'Withdrawal', ?)`,
+      [this.user_id, logMessage]
+    );
+
+    // Step 9: Update local state
+    this.goal_status = 'withdrawn';
+    this.current_amount = 0;
+
+    return { amount: baseAmount, bonusAmount: bonus.bonusAmount, totalAmount, bonusEligible: bonus.eligible, reference };
+  }
 }
 
 
