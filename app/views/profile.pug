@@ -1,0 +1,80 @@
+extends layout
+
+block content
+  .page-header
+    div
+      h1.page-title My Profile
+      p.page-subtitle Manage your personal details and account settings
+
+  if session && session.successMessage
+    .alert-success #{session.successMessage}
+    - delete session.successMessage
+
+  if session && session.errorMessage
+    .alert-danger #{session.errorMessage}
+    - delete session.errorMessage
+
+  .form-page-wrap
+
+    //- ── Personal details ────────────────────────────────────────────────────
+    .form-card(style="margin-bottom:1.5rem;")
+      .form-card-header
+        p.form-card-title Personal Details
+      .form-card-body
+        form(action="/profile" method="POST")
+          .form-group
+            label.form-label(for="full_name") Full Name
+            input.form-control#full_name(
+              type="text"
+              name="full_name"
+              value=profile.full_name
+              required
+            )
+
+          .form-group
+            label.form-label Email
+            input.form-control(
+              type="email"
+              value=profile.email
+              disabled
+              style="background:#f9fafb;color:#9ca3af;cursor:not-allowed;"
+            )
+            p(style="font-size:0.78rem;color:#9ca3af;margin-top:0.3rem;") Email cannot be changed.
+
+          .form-group
+            label.form-label(for="occupation") Occupation
+            input.form-control#occupation(
+              type="text"
+              name="occupation"
+              value=profile.occupation || ''
+              placeholder="e.g. Software Engineer"
+            )
+
+          .form-actions
+            button.btn.btn-primary(type="submit") Save Changes
+
+    //- ── Payout accounts shortcut ────────────────────────────────────────────
+    .form-card(style="margin-bottom:1.5rem;")
+      .form-card-header
+        p.form-card-title Payout Accounts
+      .form-card-body
+        p(style="font-size:0.875rem;color:#6b7280;margin-bottom:1rem;")
+          | Manage the bank accounts used for goal withdrawals.
+        a.btn.btn-secondary(href="/accounts") Manage Payout Accounts
+
+    //- ── Danger zone ─────────────────────────────────────────────────────────
+    .form-card(style="border-left:4px solid #ef4444;")
+      .form-card-header(style="border-bottom:1px solid #fee2e2;")
+        p.form-card-title(style="color:#dc2626;") Danger Zone
+      .form-card-body
+        p(style="font-size:0.875rem;color:#374151;font-weight:600;margin-bottom:0.35rem;") Delete your Savify account
+        p(style="font-size:0.82rem;color:#6b7280;margin-bottom:1.25rem;line-height:1.6;")
+          | Permanently removes your account and all associated data. This cannot be undone.
+          br
+          | Your account can only be deleted if you have no active goals, no completed goals awaiting withdrawal, and no pending transactions.
+        form(
+          action="/profile/delete"
+          method="POST"
+          onsubmit="return confirm('This will permanently delete your account and all your data. Are you absolutely sure?')"
+        )
+          button.btn.btn-danger(type="submit") Delete My Account

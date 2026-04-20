@@ -1,27 +1,48 @@
 extends layout
 
 block content
-  section(class='space-y-4')
-    h1(class='text-xl font-semibold') My Payout Accounts
+  .page-header
+    div
+      h1.page-title My Payout Accounts
+      p.page-subtitle Manage the bank accounts used for goal withdrawals
+    a.btn.btn-primary(href="/accounts/add") + Add Account
 
-    if session.successMessage
-      .alert.alert-success= session.successMessage
-      - delete session.successMessage
+  if session && session.successMessage
+    .alert-success #{session.successMessage}
+    - delete session.successMessage
 
-    if session.errorMessage
-      .alert.alert-danger= session.errorMessage
-      - delete session.errorMessage
+  if session && session.errorMessage
+    .alert-danger #{session.errorMessage}
+    - delete session.errorMessage
 
-    a.btn.btn-dark(href="/accounts/add") + Add Account
-
-    if accounts && accounts.length
-      .grid(class='grid-cols-1 md:grid-cols-2 gap-4 mt-4')
-        each acc in accounts
-          article.card
-            h2(class='text-lg font-semibold mb-1') #{acc.account_name}
-            p #[span.label Bank:] #{acc.bank_name}
-            p #[span.label Account number:] ****#{acc.account_number.slice(-4)}
-            p #[span.label Sort code:] #{acc.sort_code}
-            p #[span.label Type:] #{acc.account_type}
-    else
-      p.text-slate-600 No accounts saved yet.
+  if accounts && accounts.length
+    .goals-grid
+      each acc in accounts
+        .goal-card
+          .goal-card-top
+            .goal-card-title #{acc.account_name}
+            span.status-badge.status-active #{acc.account_type}
+          .goal-card-meta
+            p(style="font-size:0.85rem;color:#6b7280;margin-bottom:0.25rem;")
+              span(style="font-weight:500;color:#374151;") Bank:&nbsp;
+              | #{acc.bank_name}
+            p(style="font-size:0.85rem;color:#6b7280;margin-bottom:0.25rem;")
+              span(style="font-weight:500;color:#374151;") Account:&nbsp;
+              | ****#{acc.account_number.slice(-4)}
+            p(style="font-size:0.85rem;color:#6b7280;")
+              span(style="font-weight:500;color:#374151;") Sort code:&nbsp;
+              | #{acc.sort_code}
+          .goal-card-actions(style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f1f5f9;display:flex;gap:0.5rem;")
+            a.btn.btn-secondary(href=`/accounts/${acc.account_id}/edit` style="font-size:0.8rem;padding:0.35rem 0.85rem;") Edit
+            form(
+              action=`/accounts/${acc.account_id}/delete`
+              method="POST"
+              onsubmit="return confirm('Remove this account? This cannot be undone.')"
+              style="margin:0;"
+            )
+              button.btn.btn-danger(type="submit" style="font-size:0.8rem;padding:0.35rem 0.85rem;") Remove
+  else
+    .form-card(style="text-align:center;padding:3rem 2rem;")
+      p(style="color:#6b7280;margin-bottom:0.5rem;font-size:0.95rem;") No payout accounts saved yet.
+      p(style="color:#9ca3af;font-size:0.85rem;margin-bottom:1.5rem;") Add a bank account to enable goal withdrawals.
+      a.btn.btn-primary(href="/accounts/add") + Add Payout Account

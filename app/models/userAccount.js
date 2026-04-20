@@ -28,6 +28,32 @@ class UserAccount {
     );
     return result.insertId;
   }
+
+  static async getById(accountId, userId) {
+    const rows = await db.query(
+      `SELECT account_id, user_id, account_name, bank_name, account_number, sort_code, account_type
+       FROM user_account WHERE account_id = ? AND user_id = ?`,
+      [accountId, userId]
+    );
+    return rows.length ? new UserAccount(rows[0]) : null;
+  }
+
+  static async update(accountId, userId, { account_name, bank_name, account_number, sort_code, account_type }) {
+    const result = await db.query(
+      `UPDATE user_account SET account_name = ?, bank_name = ?, account_number = ?, sort_code = ?, account_type = ?
+       WHERE account_id = ? AND user_id = ?`,
+      [account_name, bank_name, account_number, sort_code, account_type || 'current', accountId, userId]
+    );
+    return result.affectedRows > 0;
+  }
+
+  static async delete(accountId, userId) {
+    const result = await db.query(
+      `DELETE FROM user_account WHERE account_id = ? AND user_id = ?`,
+      [accountId, userId]
+    );
+    return result.affectedRows > 0;
+  }
 }
 
 module.exports = { UserAccount };

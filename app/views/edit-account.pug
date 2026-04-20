@@ -1,0 +1,74 @@
+extends layout
+
+block content
+  .page-header
+    div
+      h1.page-title Edit Account
+      p.page-subtitle Update your payout account details
+    a.btn.btn-secondary(href="/accounts") ← Back to Accounts
+
+  .form-page-wrap
+
+    if session && session.errorMessage
+      .alert-danger #{session.errorMessage}
+      - delete session.errorMessage
+
+    .form-card
+      .form-card-header
+        p.form-card-title Account Details
+
+      .form-card-body
+        form(action=`/accounts/${account.account_id}/edit` method="POST")
+
+          .form-group
+            label.form-label(for="account_name") Account Nickname
+            input.form-control#account_name(
+              type="text"
+              name="account_name"
+              value=account.account_name
+              placeholder="e.g. My HSBC Current Account"
+              required
+            )
+
+          .form-group
+            label.form-label(for="bank_name") Bank Name
+            input.form-control#bank_name(
+              type="text"
+              name="bank_name"
+              value=account.bank_name
+              placeholder="e.g. HSBC"
+              required
+            )
+
+          .form-group
+            label.form-label(for="account_number") Account Number
+            input.form-control#account_number(
+              type="text"
+              name="account_number"
+              value=account.account_number
+              placeholder="8 digits"
+              maxlength="8"
+              required
+            )
+
+          .form-group
+            label.form-label(for="sort_code") Sort Code
+            input.form-control#sort_code(
+              type="text"
+              name="sort_code"
+              value=account.sort_code
+              placeholder="e.g. 04-00-04"
+              maxlength="8"
+              required
+            )
+
+          .form-group
+            label.form-label(for="account_type") Account Type
+            select.form-control#account_type(name="account_type")
+              option(value="current" selected=(account.account_type === 'current')) Current
+              option(value="savings" selected=(account.account_type === 'savings')) Savings
+              option(value="isa" selected=(account.account_type === 'isa')) ISA
+
+          .form-actions
+            button.btn.btn-primary(type="submit") Save Changes
+            a.btn.btn-secondary(href="/accounts") Cancel

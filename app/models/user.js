@@ -223,6 +223,73 @@ class User {
     this.hasLoadedContributions = true;
     return this.contributions;
   }
+
+  async updateProfile({ full_name, occupation }) {
+    await db.query(
+      `UPDATE users SET full_name = ?, occupation = ? WHERE user_id = ?`,
+      [full_name, occupation || null, this.user_id]
+    );
+    if (this.profile) {
+      this.profile.full_name = full_name;
+      this.profile.occupation = occupation;
+    }
+  }
+
+  /**
+   * Returns a blocking reason string if the account cannot be deleted, or null if safe to proceed.
+   * Blocks if the user has: pending transactions, pending withdrawals, active goals, or completed goals not yet withdrawn.
+   */
+  async getDeletionBlockReason() {
+    const [txRow] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM transactions t
+       JOIN savings_goal g ON t.goal_id = g.goal_id
+       WHERE g.user_id = ? AND t.transaction_status = 'pending'`,
+      [this.user_id]
+    );
+    if (txRow.cnt > 0) return 'You have pending transactions. Please wait for them to complete before deleting your account.';
+
+    const [wdRow] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM withdrawal w
+       JOIN savings_goal g ON w.goal_id = g.goal_id
+       WHERE g.user_id = ? AND w.withdrawal_status = 'pending'`,
+      [this.user_id]
+    );
+    if (wdRow.cnt > 0) return 'You have a pending withdrawal in progress. Please wait for it to be processed first.';
+
+    const [activeRow] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM savings_goal WHERE user_id = ? AND goal_status = 'active'`,
+      [this.user_id]
+    );
+    if (activeRow.cnt > 0) return 'You have active savings goals. Please complete or cancel them before deleting your account.';
+
+    const [completedRow] = await db.query(
+      `SELECT COUNT(*) AS cnt FROM savings_goal WHERE user_id = ? AND goal_status = 'completed'`,
+      [this.user_id]
+    );
+    if (completedRow.cnt > 0) return 'You have completed goals awaiting withdrawal. Please withdraw your funds before deleting your account.';
+
+    return null;
+  }
+
+  async deleteAccount() {
+    await db.query(
+      `DELETE FROM bonus WHERE goal_id IN (SELECT goal_id FROM savings_goal WHERE user_id = ?)`,
+      [this.user_id]
+    );
+    await db.query(
+      `DELETE FROM transactions WHERE goal_id IN (SELECT goal_id FROM savings_goal WHERE user_id = ?)`,
+      [this.user_id]
+    );
+    await db.query(
+      `DELETE FROM withdrawal WHERE goal_id IN (SELECT goal_id FROM savings_goal WHERE user_id = ?)`,
+      [this.user_id]
+    );
+    await db.query(`DELETE FROM activity_log WHERE user_id = ?`, [this.user_id]);
+    await db.query(`DELETE FROM savings_goal WHERE user_id = ?`, [this.user_id]);
+    await db.query(`DELETE FROM user_account WHERE user_id = ?`, [this.user_id]);
+    await db.query(`DELETE FROM email_verifications WHERE user_id = ?`, [this.user_id]);
+    await db.query(`DELETE FROM users WHERE user_id = ?`, [this.user_id]);
+  }
 }
 
 module.exports = {
