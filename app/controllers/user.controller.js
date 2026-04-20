@@ -53,6 +53,70 @@ exports.showTransactions = async (req, res) => {
   }
 };
 
+exports.showProfile = async (req, res) => {
+  try {
+    const userId = req.session?.user?.user_id;
+    if (!userId) return res.redirect("/auth/login");
+
+    const user = new User(userId);
+    await user.getProfile();
+
+    res.render("profile", {
+      title: "My Profile",
+      profile: user.profile,
+      session: req.session,
+    });
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.session?.user?.user_id;
+    const { full_name, occupation } = req.body;
+
+    if (!full_name || !full_name.trim()) {
+      req.session.errorMessage = "Full name is required.";
+      return res.redirect("/profile");
+    }
+
+    const user = new User(userId);
+    await user.updateProfile({ full_name: full_name.trim(), occupation });
+
+    req.session.user.full_name = full_name.trim();
+    req.session.successMessage = "Profile updated successfully.";
+    res.redirect("/profile");
+  } catch (err) {
+    console.error(err);
+    req.session.errorMessage = "Unable to update profile, please try again.";
+    res.redirect("/profile");
+  }
+};
+
+exports.deleteUserAccount = async (req, res) => {
+  try {
+    const userId = req.session?.user?.user_id;
+    const user = new User(userId);
+
+    const blockReason = await user.getDeletionBlockReason();
+    if (blockReason) {
+      req.session.errorMessage = blockReason;
+      return res.redirect("/profile");
+    }
+
+    await user.deleteAccount();
+
+    req.session.destroy(() => {
+      res.redirect("/");
+    });
+  } catch (err) {
+    console.error(err);
+    req.session.errorMessage = "Unable to delete account, please try again.";
+    res.redirect("/profile");
+  }
+};
+
 exports.showContributions = async (req, res) => {
   try {
     const userId = req.session?.user?.user_id;
